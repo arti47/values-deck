@@ -19,7 +19,9 @@ Phone-first app for the *Live Your Values* deck (73 cards): find, rank and live 
 ## Run
 - **Local:** open `index.html` directly in a browser (no server needed).
 - **Local server (enables offline cache):** `python3 -m http.server 8000` → http://localhost:8000
-- **iPhone/iPad:** serve over https (see below), open in Safari → Share → Add to Home Screen.
+- **iPhone/iPad:** open the https URL in Safari → Share → Add to Home Screen.
+- **Android:** open the https URL in Chrome → Install app (or menu ⋮ → Add to Home screen).
+- Pinch/double-tap zoom is disabled; use Settings → Text size.
 
 ## Controls
 | Where | Input |

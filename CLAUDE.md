@@ -41,6 +41,11 @@ Views return `{node, focus?, tab?, cleanup?}`; `focus` hides tab bar.
 - A11y: 44px+ targets, focus-visible, ARIA live, radio-group ratings, reduced-motion, forced-colors, text-size setting.
 - Grid lists need `minmax(0,1fr)` columns to avoid overflow from nowrap text.
 
+## Install / native feel
+- `manifest.webmanifest` (standalone, portrait, maskable icon). Icons generated from `icons/icon.svg` (192, 512, maskable-512, apple-touch 180, favicon-32).
+- `js/install.js`: zoom lock (viewport `user-scalable=no` + iOS gesture/pinch/ctrl-wheel blocking, CSS `touch-action:manipulation`, inputs ≥16px), `beforeinstallprompt` button, iOS/Android step-by-step instructions (Settings → Home screen app), dismissible Home banner on mobile (`settings.installDismissed`).
+- Install needs https (or localhost); file:// shows a hint instead.
+
 ## Workflow
 - Rebuild data: `python3 tools/extract_cards.py <epub> --repo .`; bump `sw.js` VERSION on any asset change.
 - Always merge to main. Keep this file current with every change.

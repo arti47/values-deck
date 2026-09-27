@@ -1,13 +1,19 @@
 {
-  "name": "Values Deck",
+  "id": "./",
+  "name": "Live Your Values",
   "short_name": "Values",
-  "start_url": "./",
+  "description": "Sort, honor and practice what matters most to you.",
+  "start_url": "./#/",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#22313b",
-  "theme_color": "#22313b",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#efe6d6",
+  "theme_color": "#1f7a8c",
+  "categories": ["lifestyle", "health", "education"],
   "icons": [
-    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"}
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
   ]
 }

@@ -3,7 +3,7 @@
 "use strict";
 const {h, icon} = App;
 
-App.route("settings", () => {
+App.route("settings", (params, q) => {
   const S = App.state();
   const set = (k, v) => { S.settings[k] = v; App.save(); App.applySettings(); };
   const file = h("input", {type: "file", accept: "application/json,.json", class: "sr", id: "imp", onchange: async e => {
@@ -17,15 +17,18 @@ App.route("settings", () => {
     }catch(err){ App.toast("That file isn’t a valid backup."); }
     e.target.value = "";
   }});
+  if (q && q.get("install")) setTimeout(() => { const el = document.getElementById("install"); if (el){ el.scrollIntoView({behavior: App.reduced() ? "auto" : "smooth", block: "start"}); el.classList.add("flash"); } }, 50);
   return h("div", null,
     App.head("Settings"),
     h("a", {class: "list-row user-row", href: "#/users"}, App.avatar(App.user()),
       h("span", {class: "lr-txt"}, h("strong", null, App.user().name), h("span", null, App.users().length > 1 ? App.users().length + " people on this device · switch or manage" : "Add people who share this device")), icon("next")),
+    App.installSection(),
     h("section", {class: "set-group"}, h("h2", {class: "h3"}, "Look & feel"),
       h("div", {class: "field"}, h("span", {class: "label"}, "Theme"),
         App.segmented("theme", [["auto", "Auto"], ["light", "Light"], ["dark", "Dark"]], S.settings.theme, v => set("theme", v), "Theme")),
       h("div", {class: "field"}, h("span", {class: "label"}, "Text size"),
-        App.segmented("text", [["1", "Standard"], ["1.12", "Large"], ["1.25", "Largest"]], String(S.settings.text), v => set("text", +v), "Text size"))),
+        App.segmented("text", [["1", "Standard"], ["1.12", "Large"], ["1.25", "Largest"]], String(S.settings.text), v => set("text", +v), "Text size"),
+        h("p", {class: "hint", style: {marginTop: "8px"}}, "Pinch-zoom is off so the app feels native. Use this to make text bigger."))),
     h("section", {class: "set-group"}, h("h2", {class: "h3"}, "Check-ins"),
       h("div", {class: "field"}, h("span", {class: "label"}, "Remind me on Home"),
         App.segmented("cad2", [["daily", "Daily"], ["weekly", "Weekly"], ["monthly", "Monthly"]], S.settings.cadence, v => set("cadence", v), "Check-in frequency"))),

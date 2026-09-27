@@ -1,5 +1,5 @@
 // Offline cache. Bump VERSION when data or app changes.
-const VERSION = "v3";
+const VERSION = "v4";
 const ASSETS = [
  "./",
  "index.html",
@@ -17,6 +17,11 @@ const ASSETS = [
  "manifest.webmanifest",
  "data/cards.js",
  "icons/icon-192.png",
+ "icons/icon-maskable-512.png",
+ "icons/apple-touch-icon.png",
+ "icons/favicon-32.png",
+ "icons/icon.svg",
+ "js/install.js",
  "icons/icon-512.png",
  "data/images/01_ACTIVISM.jpg",
  "data/images/02_ADVENTURE.jpg",
@@ -98,7 +103,7 @@ self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
   // images: cache-first; app shell/code: network-first so updates land without a VERSION bump
-  if (url.origin === location.origin && !/\.(jpg|png)$/.test(url.pathname)){
+  if (url.origin === location.origin && !/\.(jpg|png|svg)$/.test(url.pathname)){
     e.respondWith(fetch(e.request).then(r => { const c = r.clone(); caches.open(VERSION).then(k => k.put(e.request, c)); return r; })
       .catch(() => caches.match(e.request, {ignoreSearch: true})));
     return;
