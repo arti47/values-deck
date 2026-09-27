@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "2.7.1";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "2.7.2";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["2.7.2", "Moving a card, rating or ticking no longer jumps you back to the top of the page."],
   ["2.7.1", "Pile review: all piles open; tap a value to see its card (flip for words) and move it."],
   ["2.7.0", "Adjust my values: change a few cards from your last sort without sorting everything again."],
   ["2.6.0", "Share values between phones with a link or QR code, and compare with people on other phones. Custom cards no longer falsely match in Compare."],
@@ -527,6 +528,7 @@ App.render = () => {
   if (cleanup){ try{ cleanup(); }catch(e){} cleanup = null; }
   App.$$("dialog.modal").forEach(d => { d.close(); d.remove(); });
   const main = App.$("#main");
+  const samePage = path === App._lastPath, keepY = scrollY;   // in-place redraw (e.g. after moving a card) keeps the scroll position
   const res = fn(parts.slice(1), new URLSearchParams(qs || "")) || {};
   // a view returns either a Node or {node, focus, tab, cleanup}; a bare Node must not be read as options (Node#focus is a method)
   const view = res instanceof Node ? {node: res} : res;
@@ -543,8 +545,8 @@ App.render = () => {
   App._lastPath = path;
   const t = main.querySelector("h1");
   document.title = (t ? t.textContent + " · " : "") + "Live Your Values";
-  window.scrollTo(0, 0);
-  if (App._navigated && t) t.focus({preventScroll: true});
+  if (samePage) window.scrollTo(0, keepY);
+  else { window.scrollTo(0, 0); if (App._navigated && t) t.focus({preventScroll: true}); }
   App._navigated = true;
 };
 
