@@ -69,7 +69,7 @@ App.route("deck", () => {
     ORDERS.filter(([v]) => v !== "rank" || hasSnap).map(([v, l]) => h("option", {value: v, selected: D.sort === v}, l)));
   // whole pill is the tap target: an invisible native select covers it (native picker = easiest on phones)
   const orderTxt = h("span", {class: "order-txt", "aria-hidden": "true"}, ORDERS.find(o => o[0] === D.sort)[1]);
-  orderSel.addEventListener("change", () => { orderTxt.textContent = ORDERS.find(o => o[0] === D.sort)[1]; });
+  orderSel.addEventListener("change", () => { orderTxt.textContent = ORDERS.find(o => o[0] === D.sort)[1]; orderSel.blur(); });
   const orderBox = h("div", {class: "order"}, icon("shuffle"), orderTxt, h("span", {class: "chev", "aria-hidden": "true"}, icon("down")), orderSel);
   const azBtn = h("button", {type: "button", class: "btn ghost sm az-btn", onclick: openAZ, "aria-label": "Jump to letter"}, "A–Z");
 

@@ -42,7 +42,7 @@ Views return a Node or `{node, focus?, tab?, cleanup?}`; only `focus === true` h
 - Sort: swipe right=most, up=some, left=not + big buttons, undo, keys 1/2/3, arrows, U, F.
 - A11y: 44px+ targets, focus-visible, ARIA live, radio-group ratings, reduced-motion, forced-colors, text-size setting.
 - Grid lists need `minmax(0,1fr)` columns to avoid overflow from nowrap text.
-- Polish (1.8): sort step 1 fits one screen (wizard fixed to 100dvh, `.sort-stage` container-query sizes the card); `App.head` adds a `.minibar` (fixed compact title + Back, shown via IntersectionObserver when h1 scrolls away); page-enter fade; `App.scrollHint` fades edges of `.seg.scroll`/`.tabs` and scrolls the current item into view; `body.typing` hides tab bar while an input is focused; `App.rating(name, value, onchange, labels, labelledby)` shows chosen label (`.rating-out`); 44px min targets for chips/links/small icon buttons.
+- Polish (1.8): sort step 1 fits one screen (wizard fixed to 100dvh, `.sort-stage` container-query sizes the card); `App.head` adds a `.minibar` (fixed compact title + Back, shown via IntersectionObserver when h1 scrolls away); page-enter fade; `App.scrollHint` fades edges of `.seg.scroll`/`.tabs` and scrolls the current item into view; `body.typing` hides tab bar while a text input/textarea is focused (not selects); `App.rating(name, value, onchange, labels, labelledby)` shows chosen label (`.rating-out`); 44px min targets for chips/links/small icon buttons.
 
 ## Deck (2.0)
 - Card | Grid switch (`.view-sw`, key G). Shared: search, pile filters, order select (Deck order · My ranking [needs a sort] · Shuffle; re-choosing Shuffle reshuffles; `D.order` keeps the shuffle).

@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "2.0.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "2.0.1";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["2.0.1", "Deck: tapping the order menu no longer hides the bottom menu."],
   ["2.0.0", "Deck grid view: 9 cards per page, page numbers and swipe, press-and-hold to peek, A–Z jump, order by deck, your ranking or shuffle."],
   ["1.9.0", "Careful polish: better contrast, large-text layouts, no dead ends in Choose 10, no double saves, “Forgot PIN?”, tidier people lists and headers."],
   ["1.8.2", "Smoother sorting (no flicker), clearer disabled buttons, tidier card picker, “Progress saved” when leaving a sort."],
@@ -531,8 +532,10 @@ App.scrollHint = el => {
   if (cur) requestAnimationFrame(() => { const r = cur.getBoundingClientRect(), b = el.getBoundingClientRect(); if (r.right > b.right || r.left < b.left) el.scrollLeft += r.left - b.left - 16; upd(); });
 };
 /* hide the tab bar while typing so it never covers the field or keyboard */
-document.addEventListener("focusin", e => { if (e.target.matches("input[type=text], input[type=search], input:not([type]), textarea, select")) document.body.classList.add("typing"); });
-document.addEventListener("focusout", () => setTimeout(() => { if (!document.activeElement || !document.activeElement.matches("input, textarea, select")) document.body.classList.remove("typing"); }, 50));
+// only real keyboard fields; dropdowns (select) open a picker, not a keyboard, so the tab bar stays
+const TYPING = "input[type=text], input[type=search], input:not([type]), textarea";
+document.addEventListener("focusin", e => { if (e.target.matches(TYPING)) document.body.classList.add("typing"); });
+document.addEventListener("focusout", () => setTimeout(() => { if (!document.activeElement || !document.activeElement.matches(TYPING)) document.body.classList.remove("typing"); }, 50));
 
 /* ---------- theme / text size ---------- */
 App.applySettings = () => {
