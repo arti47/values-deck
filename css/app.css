@@ -1067,3 +1067,6 @@ html.lock-scroll,html.lock-scroll body{overflow:hidden;height:100%;overscroll-be
 html.lock-scroll #main{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .view.focus .wizard:has(.sort-stage){height:calc(100dvh - 34px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 html.lock-scroll .pile-btn,html.lock-scroll .icon-btn,html.lock-scroll .restart-pill,html.lock-scroll .link{touch-action:manipulation}
+/* 2.4.2: rank rows scroll normally; only the drag handle captures the finger */
+.rrow{touch-action:pan-y}
+.grip{touch-action:none}
