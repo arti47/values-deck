@@ -11,7 +11,7 @@ Phone-first app for the *Live Your Values* deck (73 cards): find, rank and live 
 - **Reflect**: daily/weekly/monthly check-ins, trend sparklines, Home nudge when due.
 - **History**: dated sorts with rank changes; yearly re-sort nudge.
 - **Together**: pass-the-phone group sorts, compare shared/unique, discussion questions.
-- **Deck**: browse, search, filter by pile, shuffle.
+- **Deck**: card view or grid view (9 per page, pager, swipe, press-and-hold peek, A–Z jump); search, filter by pile, order by deck / my ranking / shuffle.
 - **My own cards**: 2 blank cards.
 - **Why values**: benefits, every way to use the deck (linked), quotes.
 - **Updates**: "A new version is ready" toast with an Update button.

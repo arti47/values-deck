@@ -27,7 +27,7 @@ Personal HTML5 viewer simulating the physical *Live Your Values* card deck. Priv
 `settings{theme,text,cadence,onboarded,swipeHint}`, `custom[2]`, `profiles[{id,name,color}]` ("me" only; legacy guests migrated),
 `sorts{pid:{stage:piles|pick|rank,assign{id:most|some|not},log[],picked[],ranked[]}}` (in-progress),
 `snapshots[{id,profile,date,top[10],most[],some[],not[]}]` (latest "me" = core values),
-`journal{id:{meaning,why,origin}}`, `audit{rel|work|leisure|health:{id:{s,n}}}`, `decisions[]`, `reflections[{date,scores{},notes{},note}]`, `group{notes,selected}`, `deck{i,order,filter,q}`.
+`journal{id:{meaning,why,origin}}`, `audit{rel|work|leisure|health:{id:{s,n}}}`, `decisions[]`, `reflections[{date,scores{},notes{},note}]`, `group{notes,selected}`, `deck{i,order,filter,q,view:card|grid,sort:deck|rank|shuffle,page,from}`.
 Backup = export/import this JSON (Settings).
 
 ## Routes (hash)
@@ -43,6 +43,12 @@ Views return a Node or `{node, focus?, tab?, cleanup?}`; only `focus === true` h
 - A11y: 44px+ targets, focus-visible, ARIA live, radio-group ratings, reduced-motion, forced-colors, text-size setting.
 - Grid lists need `minmax(0,1fr)` columns to avoid overflow from nowrap text.
 - Polish (1.8): sort step 1 fits one screen (wizard fixed to 100dvh, `.sort-stage` container-query sizes the card); `App.head` adds a `.minibar` (fixed compact title + Back, shown via IntersectionObserver when h1 scrolls away); page-enter fade; `App.scrollHint` fades edges of `.seg.scroll`/`.tabs` and scrolls the current item into view; `body.typing` hides tab bar while an input is focused; `App.rating(name, value, onchange, labels, labelledby)` shows chosen label (`.rating-out`); 44px min targets for chips/links/small icon buttons.
+
+## Deck (2.0)
+- Card | Grid switch (`.view-sw`, key G). Shared: search, pile filters, order select (Deck order · My ranking [needs a sort] · Shuffle; re-choosing Shuffle reshuffles; `D.order` keeps the shuffle).
+- Grid: 9 per page (`PER`), pager ‹ 1 … n › (compact with ellipsis >5 pages), swipe/arrow keys/PageUp/Down, sticky pager above tab bar. Tiles: artwork + badge (gold rank for top 10, teal dot Most, mustard dot Some). `fitGrid()` sizes tiles: fit 3 rows when possible, else ≥~120px wide and scroll.
+- Tap tile → card view (`D.from="grid"` shows a Grid button that returns to the page containing the card). Long-press 450ms → peek modal that auto-flips to ideas. A–Z sheet jumps to first card per letter in the current list.
+- Card view is height-fitted (container query) so its bar is always visible.
 
 ## UX safety rules (1.9)
 - Text tokens meet WCAG AA 4.5:1 on all surfaces (light `--ink-2 #4f5d64`, `--ink-3 #5c686e`, `--rose-ink` for red text; never use `--rose` for text). Verify with an automated contrast/tap-target/overflow audit across 375×560 + 390×664, light/dark, text 1 and 1.25.
