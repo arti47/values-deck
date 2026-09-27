@@ -243,13 +243,15 @@ App.route("deck", () => {
   document.addEventListener("keydown", onKey);
 
   // search expands to the full bar while focused (other buttons slide away, Cancel appears); collapses on leave, text kept
-  const cancel = h("button", {type: "button", class: "search-cancel", tabindex: "-1",
-    onpointerdown: e => e.preventDefault(),   // keep focus so the tap lands before collapse
-    onclick: () => { search.value = ""; if (D.q){ D.q = ""; refilter(); } search.blur(); }}, "Cancel");
+  // act on touch-down: on iPhone the search blurs (and the bar collapses) before a normal click would land
+  const doCancel = () => { search.value = ""; if (D.q){ D.q = ""; refilter(); } top.classList.remove("searching"); cancel.tabIndex = -1; search.blur(); };
+  const cancel = h("button", {type: "button", class: "search-cancel", tabindex: "-1", onclick: doCancel}, "Cancel");
+  cancel.addEventListener("touchstart", e => { e.preventDefault(); doCancel(); }, {passive: false});
+  cancel.addEventListener("mousedown", e => { e.preventDefault(); doCancel(); });
   const top = h("div", {class: "deck-top"}, h("label", {class: "search"}, icon("search"), h("span", {class: "sr"}, "Search values"), search), orderBox, azBtn, viewSw, cancel);
   search.addEventListener("focus", () => { top.classList.add("searching"); cancel.tabIndex = 0; });
-  search.addEventListener("blur", () => setTimeout(() => { if (document.activeElement !== cancel){ top.classList.remove("searching"); cancel.tabIndex = -1; } }, 80));
-  search.addEventListener("keydown", e => { if (e.key === "Escape") cancel.click(); else if (e.key === "Enter") search.blur(); });
+  search.addEventListener("blur", e => { if (e.relatedTarget === cancel) return; setTimeout(() => { if (document.activeElement !== cancel && document.activeElement !== search){ top.classList.remove("searching"); cancel.tabIndex = -1; } }, 150); });
+  search.addEventListener("keydown", e => { if (e.key === "Escape") doCancel(); else if (e.key === "Enter") search.blur(); });
 
   const node = h("div", {class: "deck view-" + D.view},
     h("h1", {class: "sr", tabindex: "-1"}, "Deck"),
