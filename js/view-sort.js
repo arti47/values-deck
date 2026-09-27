@@ -85,14 +85,14 @@ function piles(pid, s){
   let busy = false;
 
   // swipe
-  let x0 = null, y0 = 0, dx = 0, dy = 0, moved = false;
+  let x0 = null, y0 = 0, dx = 0, dy = 0, moved = false, raf = 0;
   cardBox.addEventListener("pointerdown", e => { if (e.button) return; x0 = e.clientX; y0 = e.clientY; dx = dy = 0; moved = false; cardBox.setPointerCapture(e.pointerId); cardBox.style.transition = "none"; });
   cardBox.addEventListener("pointermove", e => {
     if (x0 === null) return;
     dx = e.clientX - x0; dy = e.clientY - y0;
     if (Math.abs(dx) + Math.abs(dy) > 8) moved = true;
     if (!moved) return;
-    cardBox.style.transform = `translate(${dx}px, ${Math.min(dy, 40)}px) rotate(${dx / 18}deg)`;
+    if (!raf) raf = requestAnimationFrame(() => { raf = 0; cardBox.style.transform = `translate(${dx}px, ${Math.min(dy, 40)}px) rotate(${dx / 18}deg)`; });
     const p = dir(dx, dy, 50);
     stamp.className = "stamp" + (p ? " on " + p : "");
     stamp.textContent = p ? PILES[p].label : "";
@@ -123,7 +123,8 @@ function piles(pid, s){
     h("span", {class: "pc", "aria-label": pileIds(s, p).length + " cards"}, pileIds(s, p).length));
 
   // while dragging, the matching button lights up (and the stamp on the card names the pile)
-  function lean(p){ App.$$(".pile-btn", row).forEach(b => b.classList.toggle("lean", !!p && b.classList.contains(p))); }
+  let leaning = null;
+  function lean(p){ if (p === leaning) return; leaning = p; App.$$(".pile-btn", row).forEach(b => b.classList.toggle("lean", !!p && b.classList.contains(p))); }
 
   const onKey = e => {
     if (e.target.closest("input,textarea")) return;

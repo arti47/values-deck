@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "2.3.1";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "2.3.2";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["2.3.2", "Swiping a card up is smooth again (it no longer gets cut off)."],
   ["2.3.1", "Sort buttons no longer overlap when highlighted."],
   ["2.3.0", "Swipe tutorial: an animated demo before your first card, with Try it practice. Replay any time with the ? button while sorting."],
   ["2.2.1", "Sorting: cleaner screen, bigger card, slimmer buttons with swipe arrows; the matching button lights up as you swipe."],

@@ -1045,3 +1045,12 @@ dialog.tut-modal{max-width:420px}
 .mini-btn{font-size:12px!important;line-height:1.15}
 .mini-btn .pl{white-space:normal;overflow:visible;text-overflow:clip;text-align:center}
 .demo-card .stamp{font-size:13px;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+/* 2.3.2: a card dragged upward must not be clipped: let it travel over the counter/header */
+.sort-body:has(.sort-stage){overflow:visible}
+.sort-stage{overflow:visible;position:relative;z-index:4}
+.sort-stage .vbox.swipe{position:relative;z-index:5;will-change:transform}
+.view.focus .wizard:has(.sort-stage){overflow-x:clip;overflow-y:visible}
+.demo-stage{overflow:visible}
+.demo-card{z-index:3}
+@keyframes demoSome{0%{transform:none}15%{transform:translateY(6px)}55%,70%{transform:translateY(-48px);opacity:1}85%{transform:translateY(-90px);opacity:0}100%{transform:none;opacity:0}}
+.wizard>.wiz-head{position:relative;z-index:1}
