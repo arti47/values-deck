@@ -145,7 +145,12 @@ function piles(pid, s){
     h("div", {class: "sort-stage"}, cardBox),
     h("div", {class: "caption"}, h("h2", null, App.title(c.name)), h("p", null, c.definition),
       h("button", {class: "link", onclick: () => cardBox.flip()}, icon("flip"), "Flip for ideas")),
-    row), {right: undoBtn});
+    row), {right: h("span", {class: "head-btns"},
+      h("button", {class: "icon-btn", "aria-label": "How to sort", title: "How to sort", onclick: () => App.swipeTutorial()}, h("span", {class: "q-mark", "aria-hidden": "true"}, "?")),
+      undoBtn)});
+  // first time this person reaches step 1: show the swipe tutorial once
+  const st = App.state().settings;
+  if (!st.swipeTutorialSeen) setTimeout(() => { if (location.hash.startsWith("#/sort") && !document.querySelector("dialog[open]")) App.swipeTutorial(); }, 250);
 
   // preload next images
   left.slice(1, 3).forEach(n => { if (n.image) new Image().src = n.image; });
@@ -337,6 +342,80 @@ function finish(pid, s){
   if (App.inGroup()){ App.lock(); App.go("#/together"); App.toast("Saved to " + App.user().name + "’s profile. Pass the phone on."); }
   else App.go("#/values?new=1");
 }
+
+
+/* ---------- swipe tutorial: looping demo + "Try it" practice ---------- */
+App.swipeTutorial = () => {
+  const S = App.state();
+  const STEPS = [["most", "next", "Swipe right", "Matters most"], ["some", "up", "Swipe up", "Matters some"], ["not", "back", "Swipe left", "Doesn’t matter"]];
+  const demoCard = App.card(27) || App.cards()[0];
+  const card = h("div", {class: "demo-card"}, h("img", {src: demoCard.image, alt: "", draggable: "false"}), h("div", {class: "stamp", "aria-hidden": "true"}));
+  const stamp = card.querySelector(".stamp");
+  const cap = h("p", {class: "demo-cap", "aria-live": "polite"});
+  const mini = STEPS.map(([p]) => h("span", {class: "mini-btn pile-btn " + p}, p === "not" ? icon("back") : p === "some" ? icon("up") : null, h("span", {class: "pl"}, PILES[p].label), p === "most" ? icon("next") : null));
+  const miniRow = h("div", {class: "mini-row", "aria-hidden": "true"}, mini[2], mini[1], mini[0]);
+  let k = 0, timer = null, trying = false;
+  const tried = new Set();
+
+  function show(i){
+    const [p, , how, what] = STEPS[i];
+    card.className = "demo-card go-" + p;
+    stamp.className = "stamp on " + p; stamp.textContent = what;
+    mini.forEach((m, j) => m.classList.toggle("lean", j === i));
+    cap.replaceChildren(h("strong", null, how), " = " + what);
+  }
+  function rest(){ card.className = "demo-card"; stamp.className = "stamp"; mini.forEach(m => m.classList.remove("lean")); }
+  function loop(){
+    if (trying) return;
+    show(k);
+    timer = setTimeout(() => { rest(); timer = setTimeout(() => { k = (k + 1) % 3; loop(); }, 500); }, 1500);
+  }
+  function stopLoop(){ clearTimeout(timer); rest(); }
+
+  // practice: drag the demo card in any direction
+  let x0 = null, y0 = 0, dx = 0, dy = 0;
+  card.addEventListener("pointerdown", e => { if (!trying) return; x0 = e.clientX; y0 = e.clientY; dx = dy = 0; card.setPointerCapture(e.pointerId); card.style.transition = "none"; });
+  card.addEventListener("pointermove", e => {
+    if (x0 === null) return;
+    dx = e.clientX - x0; dy = e.clientY - y0;
+    card.style.transform = `translate(${dx}px, ${Math.min(dy, 30)}px) rotate(${dx / 16}deg)`;
+    const p = dirOf(dx, dy, 35);
+    stamp.className = "stamp" + (p ? " on " + p : ""); stamp.textContent = p ? PILES[p].label : "";
+    mini.forEach((m, j) => m.classList.toggle("lean", !!p && STEPS[j][0] === p));
+  });
+  const end = () => {
+    if (x0 === null) return; x0 = null;
+    const p = dirOf(dx, dy, 60);
+    card.style.transition = ""; card.style.transform = "";
+    if (p){
+      tried.add(p); App.vibrate(10);
+      cap.replaceChildren(h("strong", null, "✓ " + PILES[p].label), tried.size < 3 ? " · now try the other ways" : " · you’ve got it!");
+      if (tried.size === 3) startBtn.classList.add("pulse");
+    }
+    setTimeout(() => { stamp.className = "stamp"; mini.forEach(m => m.classList.remove("lean")); }, 600);
+  };
+  card.addEventListener("pointerup", end); card.addEventListener("pointercancel", end);
+  function dirOf(dx, dy, t){ if (dy < -t && Math.abs(dy) > Math.abs(dx)) return "some"; if (dx > t) return "most"; if (dx < -t) return "not"; return null; }
+
+  const tryBtn = h("button", {class: "btn ghost", onclick: () => {
+    trying = !trying;
+    if (trying){ stopLoop(); card.classList.add("try"); tryBtn.textContent = "Show me again"; cap.replaceChildren(h("strong", null, "Your turn:"), " drag the card right, up or left"); }
+    else { card.classList.remove("try"); tryBtn.textContent = "Try it"; loop(); }
+  }}, "Try it");
+  const startBtn = h("button", {class: "btn primary", onclick: () => close()}, "Start sorting");
+  const body = h("div", {class: "tut"},
+    h("h2", null, "How to sort"),
+    h("p", {class: "muted small"}, "Swipe the card, or tap a button. You can undo any time."),
+    h("div", {class: "demo-stage"}, card),
+    cap, miniRow,
+    h("div", {class: "row between"}, tryBtn, startBtn));
+  const close = App.modal(body, {label: "How to sort", cls: "tut-modal"});
+  body.closest("dialog").addEventListener("close", () => { clearTimeout(timer); S.settings.swipeTutorialSeen = true; App.save(); });
+  if (App.reduced()){
+    // no motion: show all three at once
+    cap.replaceChildren(h("strong", null, "Swipe right"), " = Matters most · ", h("strong", null, "up"), " = Matters some · ", h("strong", null, "left"), " = Doesn’t matter");
+  } else loop();
+};
 
 App.route("sort", (params) => {
   const pid = "me";   // everyone sorts in their own profile (Sort together switches person first)
