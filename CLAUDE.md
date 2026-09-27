@@ -42,6 +42,7 @@ Views return a Node or `{node, focus?, tab?, cleanup?}`; only `focus === true` h
 - Sort: swipe right=most, up=some, left=not + big buttons, undo, keys 1/2/3, arrows, U, F.
 - A11y: 44px+ targets, focus-visible, ARIA live, radio-group ratings, reduced-motion, forced-colors, text-size setting.
 - Grid lists need `minmax(0,1fr)` columns to avoid overflow from nowrap text.
+- Polish (1.8): sort step 1 fits one screen (wizard fixed to 100dvh, `.sort-stage` container-query sizes the card); `App.head` adds a `.minibar` (fixed compact title + Back, shown via IntersectionObserver when h1 scrolls away); page-enter fade; `App.scrollHint` fades edges of `.seg.scroll`/`.tabs` and scrolls the current item into view; `body.typing` hides tab bar while an input is focused; `App.rating(name, value, onchange, labels, labelledby)` shows chosen label (`.rating-out`); 44px min targets for chips/links/small icon buttons.
 
 ## Booklet guidance coverage
 All booklet uses/rules are in-app: sort prep (quiet, breaths), "who you are today, not aspirational, independent of job/relationships", first instinct, own-definition OK, 3-step sort, top 10/3/1, card-back ideas, 2 blank cards, Matters Some view, journal (meaning/why/origin), 4-area life check (incl. no-job note), decision chart + conflict handling, together + 7 questions, reflection daily/weekly/monthly, re-sort yearly/5 years, benefits, people/schedule tips, quotes (`App.quote`).

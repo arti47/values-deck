@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "1.7.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "1.8.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["1.8.0", "Polish: sort screen fits every phone, Back always visible while scrolling, clearer ratings, smoother pages, tab bar hides while typing."],
   ["1.7.0", "Sort together is now for everyone on the device: start it from “Who’s using?” or Home. Each person sorts into their own profile. Old guests became people."],
   ["1.6.0", "About this app: version, what’s new, privacy and credits."],
   ["1.5.1", "Better spacing under buttons."],
@@ -375,12 +376,25 @@ App.showCard = (id, list) => {
 };
 
 /* ---------- shared UI bits ---------- */
-App.head = (title, {back, sub, right} = {}) => h("header", {class: "phead"},
-  h("div", {class: "phead-row"},
-    back ? h("a", {class: "icon-btn", href: back, "aria-label": "Back"}, icon("back")) : null,
-    h("h1", {tabindex: "-1"}, title),
-    right || null),
-  sub ? h("p", {class: "sub"}, sub) : null);
+App.head = (title, {back, sub, right} = {}) => {
+  const h1 = h("h1", {tabindex: "-1"}, title);
+  // compact bar that slides in once the big title scrolls away, so Back is always reachable
+  const mini = h("div", {class: "minibar", "aria-hidden": "true"},
+    back ? h("a", {class: "icon-btn", href: back, tabindex: "-1"}, icon("back")) : h("span", {class: "icon-btn ghost-slot"}),
+    h("span", {class: "mini-title"}, title),
+    h("span", {class: "icon-btn ghost-slot"}));
+  if (App._headObs) App._headObs.disconnect();
+  if ("IntersectionObserver" in window){
+    App._headObs = new IntersectionObserver(([e]) => { mini.classList.toggle("on", !e.isIntersecting && e.boundingClientRect.top < 0); mini.querySelector(".mini-title").textContent = h1.textContent; }, {threshold: 0});
+    requestAnimationFrame(() => App._headObs && App._headObs.observe(h1));
+  }
+  return h("header", {class: "phead"},
+    mini,
+    h("div", {class: "phead-row"},
+      back ? h("a", {class: "icon-btn", href: back, "aria-label": "Back"}, icon("back")) : null,
+      h1, right || null),
+    sub ? h("p", {class: "sub"}, sub) : null);
+};
 
 App.empty = (title, text, action) => h("div", {class: "empty"},
   h("div", {class: "empty-art", "aria-hidden": "true"}, h("span"), h("span"), h("span")),
@@ -400,16 +414,19 @@ App.segmented = (name, options, value, onchange, label) => {
   return g;
 };
 
-App.rating = (name, value, onchange, labels) => {
+App.rating = (name, value, onchange, labels, labelledby) => {
   labels = labels || ["Not at all", "A little", "Somewhat", "Mostly", "Fully"];
-  const g = h("div", {class: "rating", role: "radiogroup"});
+  const g = h("div", {class: "rating", role: "radiogroup", "aria-labelledby": labelledby || null});
+  const out = h("output", {class: "rating-out", "aria-hidden": "true"});
+  const show = v => { out.textContent = v ? v + " · " + labels[v - 1] : ""; out.classList.toggle("on", !!v); };
   for (let n = 1; n <= 5; n++){
     const id = name + "-" + n;
     g.append(h("input", {type: "radio", name, id, value: n, checked: value === n,
-        onchange: () => { onchange(n); App.vibrate(8); }}),
+        onchange: () => { onchange(n); show(n); App.vibrate(8); }}),
       h("label", {for: id, title: labels[n - 1]}, h("span", {class: "sr"}, labels[n - 1] + " "), String(n)));
   }
-  return g;
+  show(value);
+  return h("div", {class: "rating-wrap"}, g, out);
 };
 
 App.autosize = ta => { const f = () => { ta.style.height = "auto"; ta.style.height = (ta.scrollHeight + 2) + "px"; }; ta.addEventListener("input", f); requestAnimationFrame(f); return ta; };
@@ -485,12 +502,29 @@ App.render = () => {
   cleanup = view.cleanup || null;
   const tab = view.tab || name || "home";
   App.$$("#tabbar a").forEach(a => { if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  App.$$(".seg.scroll, .tabs", main).forEach(App.scrollHint);
+  if (!App.reduced()){ main.classList.remove("enter"); void main.offsetWidth; main.classList.add("enter"); }
   const t = main.querySelector("h1");
   document.title = (t ? t.textContent + " · " : "") + "Live Your Values";
   window.scrollTo(0, 0);
   if (App._navigated && t) t.focus({preventScroll: true});
   App._navigated = true;
 };
+
+/* horizontal scrollers: fade the edge that has more content */
+App.scrollHint = el => {
+  const upd = () => {
+    const more = el.scrollWidth - el.clientWidth > 2;
+    el.classList.toggle("more-r", more && el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+    el.classList.toggle("more-l", more && el.scrollLeft > 2);
+  };
+  el.addEventListener("scroll", upd, {passive: true}); requestAnimationFrame(upd);
+  const cur = el.querySelector("[aria-current], input:checked + label");
+  if (cur) requestAnimationFrame(() => { const r = cur.getBoundingClientRect(), b = el.getBoundingClientRect(); if (r.right > b.right || r.left < b.left) el.scrollLeft += r.left - b.left - 16; upd(); });
+};
+/* hide the tab bar while typing so it never covers the field or keyboard */
+document.addEventListener("focusin", e => { if (e.target.matches("input[type=text], input[type=search], input:not([type]), textarea, select")) document.body.classList.add("typing"); });
+document.addEventListener("focusout", () => setTimeout(() => { if (!document.activeElement || !document.activeElement.matches("input, textarea, select")) document.body.classList.remove("typing"); }, 50));
 
 /* ---------- theme / text size ---------- */
 App.applySettings = () => {

@@ -79,7 +79,7 @@ App.route("audit", (params) => {
       return h("li", {class: "rate-row"},
         h("div", {class: "rr-head"}, h("strong", {id: "l-" + area.id + c.id}, App.title(c.name)),
           h("button", {class: "link sm", onclick: () => { note.hidden = !note.hidden; if (!note.hidden) note.querySelector("textarea").focus(); }}, icon("pen"), "Note")),
-        (() => { const r = App.rating("r-" + area.id + "-" + c.id, e.s, v => { (m[c.id] = m[c.id] || {}).s = v; App.save(); }, ALABELS); r.setAttribute("aria-labelledby", "l-" + area.id + c.id); return r; })(),
+        App.rating("r-" + area.id + "-" + c.id, e.s, v => { (m[c.id] = m[c.id] || {}).s = v; App.save(); }, ALABELS, "l-" + area.id + c.id),
         h("div", {class: "scale-legend", "aria-hidden": "true"}, h("span", null, "Not at all"), h("span", null, "Fully")),
         note);
     })),
@@ -188,8 +188,7 @@ App.route("reflect", (params) => {
       App.head("Check-in", {back: "#/reflect", sub: "How fully did you live each value " + per + "?"}),
       h("ol", {class: "rate-list"}, core.map(c => {
         const note = h("div", {class: "note", hidden: true}, App.field("Note on " + App.title(c.name), {rows: 2, placeholder: "What helped or got in the way?", oninput: v => r.notes[c.id] = v}));
-        const rt = App.rating("rf-" + c.id, null, v => r.scores[c.id] = v, RLABELS);
-        rt.setAttribute("aria-labelledby", "rl-" + c.id);
+        const rt = App.rating("rf-" + c.id, null, v => r.scores[c.id] = v, RLABELS, "rl-" + c.id);
         return h("li", {class: "rate-row"},
           h("div", {class: "rr-head"}, h("strong", {id: "rl-" + c.id}, App.title(c.name)),
             h("button", {class: "link sm", onclick: () => { note.hidden = !note.hidden; if (!note.hidden) note.querySelector("textarea").focus(); }}, icon("pen"), "Note")),
