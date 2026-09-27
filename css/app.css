@@ -664,3 +664,10 @@ body.focus-mode #toasts{bottom:calc(120px + env(safe-area-inset-bottom))}
 .pin-key{width:72px;height:72px;border-radius:50%;background:var(--surface-2);font-family:var(--display);font-weight:700;font-size:1.6rem;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--line)}
 .pin-key:active{background:var(--teal-soft);transform:scale(.95)}
 .pin-key .i{width:26px;height:26px}
+.who-av{position:relative;display:inline-block}
+.edit-badge{position:absolute;right:0;bottom:6px;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--surface);color:var(--teal-ink);box-shadow:var(--shadow)}
+.edit-badge .i{width:18px;height:18px}
+.who-tile.managing{box-shadow:var(--shadow),inset 0 0 0 2px var(--teal)}
+.who-tile.managing .avatar{animation:wiggle 1.4s ease-in-out infinite}
+@keyframes wiggle{25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
+.person .btn.sm .i{width:16px;height:16px}

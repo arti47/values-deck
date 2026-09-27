@@ -17,6 +17,7 @@ Personal HTML5 viewer simulating the physical *Live Your Values* card deck. Priv
 - Registry `values-deck-users` = `{active, users:[{id,name,color,pin(hash|null),share,created}]}`; per-user state key `values-deck-state-v1:<uid>`.
 - Legacy single key `values-deck-state-v1` auto-migrates to user `u1` ("Me").
 - "Who's using?" picker (`#/who`) gates every route once per browser session (sessionStorage `values-deck-unlocked`) when >1 user or PIN set. Home avatar = switch.
+- Rename/recolour/delete any person: Edit on `#/users` rows or "Rename or delete people" mode on `#/who` (`App.editUser`); other people's PIN required; names unique; last person can't be deleted.
 - PIN: 4 digits, FNV hash, deterrent only. `share` = include my top 10 in others' Compare (`App.peekCore`).
 - Settings (theme, text, cadence) are per user. Backup/erase = current user only. Storage event from another tab switching user → reload.
 

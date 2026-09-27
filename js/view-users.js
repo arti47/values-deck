@@ -2,6 +2,7 @@
 (function(){
 "use strict";
 const {h, icon} = App;
+let managing = false;   // "Who's using?" edit mode
 
 App.avatar = (u, cls) => h("span", {class: "avatar " + (cls || ""), style: {background: u.color}, "aria-hidden": "true"}, (u.name || "?").slice(0, 1).toUpperCase());
 
@@ -39,6 +40,7 @@ App.pinPad = (title, {check, set} = {}) => new Promise(res => {
 });
 
 async function enter(u){
+  managing = false;
   if (u.pin){
     const ok = await App.pinPad("Hi " + u.name, {check: p => App.hashPin(p) === u.pin});
     if (!ok) return;
@@ -69,6 +71,41 @@ function addForm(after){
     h("button", {class: "btn primary block", type: "submit"}, icon("plus"), "Add person"));
 }
 
+/* Edit any person: rename, recolour, delete. Other people's PIN is required first. */
+async function editUser(u, after){
+  const self = u.id === App.user().id;
+  if (!self && u.pin){ const ok = await App.pinPad(u.name + "’s PIN", {check: p => App.hashPin(p) === u.pin}); if (!ok) return; }
+  let color = u.color;
+  const input = h("input", {id: "ename", type: "text", value: u.name, maxlength: 30, autocomplete: "off", enterkeyhint: "done"});
+  const sw = h("div", {class: "swatches", role: "radiogroup", "aria-label": "Colour"});
+  const drawSw = () => sw.replaceChildren(...App.COLORS.map(c => h("button", {type: "button", class: "swatch" + (c === color ? " on" : ""), style: {background: c},
+    role: "radio", "aria-checked": String(c === color), "aria-label": "Colour", onclick: () => { color = c; drawSw(); }})));
+  drawSw();
+  const only = App.users().length < 2;
+  const form = h("form", {class: "confirm edit-user", onsubmit: e => {
+    e.preventDefault();
+    const n = input.value.trim();
+    if (!n){ input.focus(); App.toast("Name can’t be empty."); return; }
+    if (App.users().some(x => x.id !== u.id && x.name.toLowerCase() === n.toLowerCase())){ App.toast("That name is already used."); return; }
+    u.name = n; u.color = color; App.saveUsers(); close(); App.toast("Saved"); after ? after() : App.render();
+  }},
+    h("h2", null, "Edit " + u.name),
+    h("div", {class: "field"}, h("label", {for: "ename"}, "Name"), input),
+    h("div", {class: "field"}, h("span", {class: "label"}, "Colour"), sw),
+    h("button", {class: "btn primary block", type: "submit"}, icon("check"), "Save"),
+    only ? h("p", {class: "muted small center"}, "To clear your data, use Erase my data in Settings.") :
+      h("button", {class: "btn ghost danger block", type: "button", style: {marginTop: "10px"}, onclick: async () => {
+        close();
+        if (await App.confirm("Delete " + u.name + "?", "All of " + u.name + "’s values, notes, decisions and check-ins will be permanently deleted from this device. This can’t be undone.", {ok: "Delete " + u.name, danger: true})){
+          App.removeUser(u.id); App.toast(u.name + " deleted");
+          if (self){ App.lock(); App.go("#/who"); } else after ? after() : App.render();
+        }
+      }}, icon("trash"), "Delete " + u.name));
+  const close = App.modal(form, {label: "Edit " + u.name, cls: "small"});
+  input.focus(); input.select();
+}
+App.editUser = editUser;
+
 /* ---------- Who's using? ---------- */
 App.route("who", () => {
   const raw = location.hash;
@@ -78,16 +115,20 @@ App.route("who", () => {
     h("p", {class: "eyebrow center"}, "Live Your Values"),
     h("h1", {tabindex: "-1", class: "center"}, "Who’s using this?"),
     h("ul", {class: "who-grid"},
-      us.map(u => h("li", null, h("button", {class: "who-tile", onclick: () => enter(u)},
-        App.avatar(u, "xl"), h("strong", null, u.name),
+      us.map(u => h("li", null, h("button", {class: "who-tile" + (managing ? " managing" : ""), "aria-label": managing ? "Edit " + u.name : null,
+          onclick: () => managing ? editUser(u, () => App.render()) : enter(u)},
+        h("span", {class: "who-av"}, App.avatar(u, "xl"), managing ? h("span", {class: "edit-badge", "aria-hidden": "true"}, icon("pen")) : null),
+        h("strong", null, u.name),
         u.pin ? h("span", {class: "muted small"}, icon("lock"), "PIN") : h("span", {class: "muted small"}, " "),
         App.peekCoreSelf(u.id)))),
-      h("li", null, h("button", {class: "who-tile add", onclick: () => {
+      managing ? null : h("li", null, h("button", {class: "who-tile add", onclick: () => {
         const close = App.modal(h("div", {class: "confirm"}, h("h2", null, "Add a person"),
           h("p", {class: "muted small"}, "Each person gets their own private values, journal and check-ins."),
           addForm(u => { close(); enter(u); })), {label: "Add a person", cls: "small"});
       }}, h("span", {class: "avatar xl ghost"}, icon("plus")), h("strong", null, "Add person"), h("span", {class: "muted small"}, " ")))),
-    h("p", {class: "muted small center"}, "Everyone’s data stays on this device."));
+    h("button", {class: "btn ghost block", onclick: () => { managing = !managing; App.render(); }},
+      managing ? icon("check") : icon("pen"), managing ? "Done" : "Rename or delete people"),
+    h("p", {class: "muted small center"}, managing ? "Tap a person to rename or delete them." : "Everyone’s data stays on this device."));
   return {node, focus: true};
 });
 // small subtitle on picker tiles: "3 values sorted"
@@ -111,12 +152,7 @@ App.route("users", () => {
       h("span", {class: "pinfo"}, h("strong", null, u.name + (isMe ? " (you)" : "")),
         h("span", {class: "pst"}, [u.pin ? "PIN on" : "No PIN", u.share === false ? "hidden from Compare" : null].filter(Boolean).join(" · "))),
       isMe ? null : h("button", {class: "btn sm ghost", onclick: () => enter(u)}, "Switch"),
-      isMe ? null : h("button", {class: "icon-btn sm", "aria-label": "Delete " + u.name, onclick: async () => {
-        if (u.pin){ const ok = await App.pinPad(u.name + "’s PIN", {check: p => App.hashPin(p) === u.pin}); if (!ok) return; }
-        if (await App.confirm("Delete " + u.name + "?", "All of " + u.name + "’s data will be permanently deleted from this device.", {ok: "Delete", danger: true})){
-          App.removeUser(u.id); App.toast(u.name + " deleted"); App.render();
-        }
-      }}, icon("trash")));
+      h("button", {class: "btn sm ghost", "aria-label": "Edit " + u.name, onclick: () => editUser(u)}, icon("pen"), "Edit"));
   }));
 
   const nameIn = h("input", {id: "myname", type: "text", value: me.name, maxlength: 30, autocomplete: "off",
