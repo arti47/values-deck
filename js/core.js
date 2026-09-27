@@ -3,7 +3,7 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "1.5.0";   // shown in Settings; bump with sw.js VERSION
+App.VERSION = "1.5.1";   // shown in Settings; bump with sw.js VERSION
 
 /* ---------- DOM ---------- */
 function h(tag, attrs, ...kids){

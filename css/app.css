@@ -705,3 +705,6 @@ p,li,.def,.quote{-webkit-user-select:text;user-select:text}
 .quote-card blockquote{margin:0 0 8px;font-style:italic;font-size:1.08rem;line-height:1.5}
 .quote-card figcaption{font-family:var(--display);font-weight:600;color:var(--mustard-ink);font-size:.9rem}
 .toasts-in{position:fixed;left:0;right:0;bottom:calc(24px + env(safe-area-inset-bottom));z-index:5;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;padding:0 16px}
+/* spacing: helper text directly after a full-width button */
+.btn.block+p,.btn.block+.muted{margin-top:14px}
+.hero .btn.block{margin-top:18px}
