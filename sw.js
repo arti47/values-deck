@@ -1,5 +1,5 @@
 // Offline cache. Bump VERSION when data or app changes.
-const VERSION = "v22";
+const VERSION = "v23";
 const ASSETS = [
  "./",
  "index.html",

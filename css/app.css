@@ -1036,3 +1036,12 @@ dialog.tut-modal{max-width:420px}
 .btn.pulse{animation:btnPulse 1.2s ease-in-out 3}
 @keyframes btnPulse{50%{transform:scale(1.06)}}
 @media (prefers-reduced-motion:reduce){.demo-card.go-most,.demo-card.go-not,.demo-card.go-some,.demo-card.try{animation:none}}
+/* 2.3.1: highlight stays inside the button (no scale / outer ring → never overlaps neighbours) */
+.pile-btn.lean,.pile-btn.most.lean,.pile-btn.some.lean{transform:none;box-shadow:inset 0 0 0 3px rgba(255,255,255,.9),var(--shadow);filter:brightness(1.06)}
+.pile-btn.not.lean{box-shadow:inset 0 0 0 3px var(--rose-ink),var(--shadow);filter:none}
+.mini-row{gap:8px}
+.mini-btn{overflow:hidden}
+.mini-btn .pl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-btn{font-size:12px!important;line-height:1.15}
+.mini-btn .pl{white-space:normal;overflow:visible;text-overflow:clip;text-align:center}
+.demo-card .stamp{font-size:13px;max-width:92%;overflow:hidden;text-overflow:ellipsis}
