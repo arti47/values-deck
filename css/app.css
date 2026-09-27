@@ -1062,3 +1062,8 @@ dialog.tut-modal{max-width:420px}
 .restart-pill::before{content:"";position:absolute;inset:-5px 0}   /* 44px tap area */
 .restart-pill{position:relative}
 .restart-pill:active{transform:scale(.96)}
+/* 2.4.1: sort step 1 is a fixed screen; nothing may steal vertical swipes */
+html.lock-scroll,html.lock-scroll body{overflow:hidden;height:100%;overscroll-behavior:none;touch-action:none}
+html.lock-scroll #main{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.view.focus .wizard:has(.sort-stage){height:calc(100dvh - 34px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+html.lock-scroll .pile-btn,html.lock-scroll .icon-btn,html.lock-scroll .restart-pill,html.lock-scroll .link{touch-action:manipulation}

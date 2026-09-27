@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "2.4.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "2.4.1";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["2.4.1", "Swipe up fixed on iPhone: the sort screen no longer scrolls, so upward swipes always work."],
   ["2.4.0", "Start over: restart a sort from any step (your saved results stay in History)."],
   ["2.3.2", "Swiping a card up is smooth again (it no longer gets cut off)."],
   ["2.3.1", "Sort buttons no longer overlap when highlighted."],

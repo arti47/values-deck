@@ -120,6 +120,8 @@ function piles(pid, s){
   };
   cardBox.addEventListener("pointerup", end);
   cardBox.addEventListener("pointercancel", end);
+  // iPhone: stop the browser from treating a vertical card drag as a page scroll (which cancels the drag)
+  cardBox.addEventListener("touchmove", e => { if (e.cancelable) e.preventDefault(); }, {passive: false});
   function dir(dx, dy, t){
     if (dy < -t && Math.abs(dy) > Math.abs(dx)) return "some";
     if (dx > t) return "most";
@@ -168,7 +170,8 @@ function piles(pid, s){
 
   // preload next images
   left.slice(1, 3).forEach(n => { if (n.image) new Image().src = n.image; });
-  return {node, focus: true, cleanup: () => document.removeEventListener("keydown", onKey)};
+  document.documentElement.classList.add("lock-scroll");   // the sort screen never scrolls
+  return {node, focus: true, cleanup: () => { document.removeEventListener("keydown", onKey); document.documentElement.classList.remove("lock-scroll"); }};
 }
 
 function pilesReview(pid, s){
