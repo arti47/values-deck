@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "2.0.4";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "2.1.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["2.1.0", "Safer taps: pop-ups no longer close by accident, no phone keyboard over the PIN pad, check-ins are kept as drafts, Cancel is the default on delete prompts."],
   ["2.0.4", "Deck: Cancel in search now works on iPhone."],
   ["2.0.3", "Deck: search widens when you tap it, with a Cancel button."],
   ["2.0.2", "Deck: order and A–Z buttons moved to the top bar next to Card/Grid."],
@@ -323,7 +324,12 @@ App.modal = (content, {label = "Dialog", cls = ""} = {}) => {
   const d = h("dialog", {class: "modal " + cls, "aria-label": label});
   const close = () => { d.classList.add("closing"); setTimeout(() => { d.close(); d.remove(); }, App.reduced() ? 0 : 180); };
   d.append(h("button", {class: "icon-btn modal-x", "aria-label": "Close", onclick: close}, icon("close")), content);
-  d.addEventListener("click", e => { if (e.target === d) close(); });
+  // close on backdrop only: a tap on the dialog's own padding also targets <dialog>, so check the coordinates
+  d.addEventListener("click", e => {
+    if (e.target !== d) return;
+    const r = d.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) close();
+  });
   d.addEventListener("cancel", e => { e.preventDefault(); close(); });
   document.body.append(d); d.showModal();
   return close;
@@ -334,8 +340,8 @@ App.confirm = (title, body, {ok = "OK", cancel = "Cancel", danger = false} = {})
   const box = h("div", {class: "confirm"},
     h("h2", null, title), body ? h("p", null, body) : null,
     h("div", {class: "row end"},
-      h("button", {class: "btn ghost", onclick: () => fin(false)}, cancel),
-      h("button", {class: "btn " + (danger ? "danger" : "primary"), onclick: () => fin(true), autofocus: true}, ok)));
+      h("button", {class: "btn ghost", onclick: () => fin(false), autofocus: danger}, cancel),   // destructive: safe choice has focus
+      h("button", {class: "btn " + (danger ? "danger" : "primary"), onclick: () => fin(true), autofocus: !danger}, ok)));
   const close = App.modal(box, {label: title, cls: "small"});
   box.closest("dialog").addEventListener("close", () => { if (!done){ done = true; res(false); } });
 });

@@ -37,7 +37,9 @@ App.pinPad = (title, {check, set, forgot} = {}) => new Promise(res => {
   const close = App.modal(box, {label: title, cls: "small"});
   box.closest("dialog").addEventListener("close", () => { if (!done){ done = true; res(false); } });
   box.addEventListener("keydown", e => { if (/^\d$/.test(e.key) && e.target !== hidden){ hidden.focus(); } });
-  draw(); hidden.focus();
+  draw();
+  // touch phones use the on-screen keypad only (focusing the field would pop the system keyboard over it)
+  if (matchMedia("(pointer: fine)").matches) hidden.focus(); else box.querySelector(".pin-key").focus({preventScroll: true});
 });
 
 async function enter(u){

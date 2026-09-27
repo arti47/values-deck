@@ -56,6 +56,8 @@ Views return a Node or `{node, focus?, tab?, cleanup?}`; only `focus === true` h
 - No double saves: `finish()` returns if the sort was already saved; check-in Save disables itself.
 - Empty decisions (opened, never filled) are pruned when the Decide list renders.
 - "Forgot PIN?" on the PIN pad → confirm → delete that profile (`App.forgotPin`); PINs are unrecoverable by design.
+- Interaction rules (2.1): `App.modal` closes only on a tap outside the dialog rect (padding taps target <dialog> too); destructive `App.confirm` autofocuses Cancel; PIN pad focuses the hidden input only on `pointer: fine` (no system keyboard on phones); check-in keeps a draft in `S.reflectDraft` (restored, "Continue check-in", Cancel asks before discarding); page behind an open dialog doesn't scroll; `.btn.block` wraps long text.
+- QA scripts to rerun after UI changes: automated audit (contrast, tap targets, overflow, text spill) + "monkey" test (tap every control on every route, rich and empty profiles, catch page errors).
 - Long `App.head` titles (>26 chars) get `.long` (smaller headline). Tab bar labels fixed 11px nowrap. People rows wrap with `.pbtns` kept together.
 
 ## Booklet guidance coverage

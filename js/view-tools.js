@@ -180,26 +180,32 @@ App.route("reflect", (params) => {
   if (!core.length) return h("div", null, App.head("Reflect", {back: "#/"}), App.needCore());
   const S = App.state();
   if (params[0] === "new"){
-    const r = {scores: {}, notes: {}, note: ""};
+    // draft survives leaving the page (tab bar, back, app switch); cleared on Save or Discard
+    const r = S.reflectDraft || (S.reflectDraft = {scores: {}, notes: {}, note: ""});
+    const hasDraft = () => Object.keys(r.scores).length || Object.values(r.notes).some(v => v && v.trim()) || (r.note && r.note.trim());
     const per = {daily: "today", weekly: "this week", monthly: "this month"}[S.settings.cadence];
     const save = h("button", {class: "btn primary lg", onclick: () => {
       if (!Object.keys(r.scores).length){ App.toast("Rate at least one value first."); return; }
       if (save.disabled) return; save.disabled = true;   // no double save
       S.reflections.push(Object.assign({id: App.uid(), date: new Date().toISOString(), cadence: S.settings.cadence}, r));
+      delete S.reflectDraft;
       App.save(true); App.confetti(); App.toast("Check-in saved"); App.go("#/reflect");
     }}, icon("check"), "Save check-in");
     return {focus: false, tab: "home", node: h("div", null,
       App.head("Check-in", {back: "#/reflect", sub: "How fully did you live each value " + per + "?"}),
       h("ol", {class: "rate-list"}, core.map(c => {
-        const note = h("div", {class: "note", hidden: true}, App.field("Note on " + App.title(c.name), {rows: 2, placeholder: "What helped or got in the way?", oninput: v => r.notes[c.id] = v}));
-        const rt = App.rating("rf-" + c.id, null, v => r.scores[c.id] = v, RLABELS, "rl-" + c.id);
+        const note = h("div", {class: "note", hidden: !r.notes[c.id]}, App.field("Note on " + App.title(c.name), {rows: 2, value: r.notes[c.id] || "", placeholder: "What helped or got in the way?", oninput: v => r.notes[c.id] = v}));
+        const rt = App.rating("rf-" + c.id, r.scores[c.id] || null, v => { r.scores[c.id] = v; App.save(); }, RLABELS, "rl-" + c.id);
         return h("li", {class: "rate-row"},
           h("div", {class: "rr-head"}, h("strong", {id: "rl-" + c.id}, App.title(c.name)),
             h("button", {class: "link sm", onclick: () => { note.hidden = !note.hidden; if (!note.hidden) note.querySelector("textarea").focus(); }}, icon("pen"), "Note")),
           rt, h("div", {class: "scale-legend", "aria-hidden": "true"}, h("span", null, "Barely"), h("span", null, "Fully")), note);
       })),
-      App.field("Anything to change going forward?", {rows: 3, placeholder: "Next " + per.replace("this ", "").replace("today", "day") + " I will…", oninput: v => r.note = v}),
-      h("div", {class: "wiz-foot sticky"}, h("a", {class: "btn ghost", href: "#/reflect"}, "Cancel"), save))};
+      App.field("Anything to change going forward?", {rows: 3, value: r.note || "", placeholder: "Next " + per.replace("this ", "").replace("today", "day") + " I will…", oninput: v => r.note = v}),
+      h("div", {class: "wiz-foot sticky"}, h("button", {class: "btn ghost", onclick: async () => {
+        if (hasDraft() && !(await App.confirm("Discard this check-in?", "Your ratings and notes for this check-in will be cleared.", {ok: "Discard", danger: true}))) return;
+        delete S.reflectDraft; App.save(); App.go("#/reflect");
+      }}, "Cancel"), save))};
   }
   const R = S.reflections;
   const last = R[R.length - 1];
@@ -211,7 +217,7 @@ App.route("reflect", (params) => {
       App.segmented("cad", [["daily", "Daily"], ["weekly", "Weekly"], ["monthly", "Monthly"]], S.settings.cadence, v => { S.settings.cadence = v; App.save(); App.render(); }, "Check-in frequency")),
     h("div", {class: "checkin-cta" + (due ? " due" : "")},
       h("p", null, due ? h("strong", null, "Your check-in is due.") : h("span", null, "Last check-in: " + App.fmtDate(last.date) + ".")),
-      h("a", {class: "btn primary block lg", href: "#/reflect/new"}, icon("sun"), due ? "Start check-in" : "Check in again")),
+      h("a", {class: "btn primary block lg", href: "#/reflect/new"}, icon("sun"), S.reflectDraft && Object.keys(S.reflectDraft.scores).length ? "Continue check-in" : due ? "Start check-in" : "Check in again")),
     R.length ? h("section", null,
       h("h2", {class: "h3"}, "Trends"),
       h("ul", {class: "trends"}, core.map(c => {
