@@ -54,5 +54,10 @@ python3 tools/extract_cards.py path/to/book.epub --repo .
 ```
 Then bump `VERSION` in `sw.js`.
 
+## Hosting (GitHub Pages)
+`.github/workflows/pages.yml` deploys app files (not `tools/`, docs or `cards.json`) on every push to `main`.
+One-time setup: repo **Settings → Pages → Build and deployment → Source: GitHub Actions**. URL: `https://arti47.github.io/values-deck/`.
+Pages on a private repo needs GitHub Pro/Team; the published site is public (noindex + robots.txt block search engines, but anyone with the URL can open it).
+
 ## Content notice
-Card text and artwork © Lisa Congdon & Andreea Niculescu / Chronicle Books. For personal use only. **Keep this repository private**; do not publish via public GitHub Pages.
+Card text and artwork © Lisa Congdon & Andreea Niculescu / Chronicle Books. For personal use only. The Pages site is publicly reachable by URL; don't share the link widely.

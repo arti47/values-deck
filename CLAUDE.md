@@ -50,5 +50,9 @@ Views return `{node, focus?, tab?, cleanup?}`; `focus` hides tab bar.
 - Rebuild data: `python3 tools/extract_cards.py <epub> --repo .`; bump `sw.js` VERSION on any asset change.
 - Always merge to main. Keep this file current with every change.
 
+## Hosting
+- GitHub Pages via `.github/workflows/pages.yml` on push to main (copies index.html, manifest, sw.js, robots.txt, css, js, icons, data minus cards.json). Add new top-level app files to that copy list.
+- noindex meta + robots.txt. Site is public by URL.
+
 ## Backlog
-- Private hosting (Netlify/Cloudflare with auth); then optionally ES modules.
+- Optional: auth-protected host if privacy needed.
