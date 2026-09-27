@@ -19,12 +19,25 @@ function frame(pid, step, body, {onExit, right} = {}){
   const who = pid === "me" ? "" : prof ? prof.name + " · " : "";
   return h("div", {class: "wizard"},
     h("header", {class: "wiz-head"},
-      h("button", {class: "icon-btn", "aria-label": "Save and exit", onclick: onExit || (() => { App.flush(); App.toast("Progress saved. Continue any time."); if (App.inGroup()){ App.lock(); App.go("#/together"); } else App.go("#/"); })}, icon("close")),
+      h("span", {class: "head-btns"},
+        h("button", {class: "icon-btn", "aria-label": "Save and exit", onclick: onExit || (() => { App.flush(); App.toast("Progress saved. Continue any time."); if (App.inGroup()){ App.lock(); App.go("#/together"); } else App.go("#/"); })}, icon("close")),
+        h("button", {class: "restart-pill", "aria-label": "Start over", title: "Start over", onclick: () => startOver(pid)}, icon("restart"), "Restart")),
       h("div", {class: "steps", "aria-label": "Step " + step + " of 3"},
         [1, 2, 3].map(n => h("span", {class: n < step ? "done" : n === step ? "on" : ""}, n)),
         h("p", {class: "steps-label"}, who + ["Sort", "Choose 10", "Rank"][step - 1])),
-      right || h("span", {class: "icon-btn ghost-slot"})),
+      right || h("span", {class: "head-btns"}, h("span", {class: "icon-btn ghost-slot"}), h("span", {class: "icon-btn ghost-slot"}))),
     body);
+}
+/* Start over: clears only this in-progress sort (saved results stay in History) */
+async function startOver(pid){
+  const s = App.state().sorts[pid];
+  const n = s ? Object.keys(s.assign).length : 0;
+  const ok = await App.confirm("Start the sort over?",
+    (n ? "The " + n + " card" + (n === 1 ? "" : "s") + " you’ve sorted so far will be cleared. " : "") + "Your saved results stay in History.",
+    {ok: "Start over", danger: true});
+  if (!ok) return;
+  App.state().sorts[pid] = newSort(); App.save(true); App.render();
+  App.toast("Starting fresh");
 }
 
 /* ---------- intro ---------- */
