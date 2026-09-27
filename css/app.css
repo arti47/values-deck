@@ -1081,3 +1081,4 @@ html.lock-scroll .pile-btn,html.lock-scroll .icon-btn,html.lock-scroll .restart-
 .heat-row [role=rowheader] .vname,.side-row .vname{max-width:100%}
 .heat-row [role=rowheader] .vn-txt,.side-row .vn-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .side-row .vn-ic,.heat-row .vn-ic{display:none}   /* dense tables: underline only */
+.vname::after{inset:-8px 0}
