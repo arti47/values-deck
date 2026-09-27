@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "2.1.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "2.2.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["2.2.0", "Sorting is clearer: labels around the card show where each swipe goes, and each button shows its swipe direction."],
   ["2.1.0", "Safer taps: pop-ups no longer close by accident, no phone keyboard over the PIN pad, check-ins are kept as drafts, Cancel is the default on delete prompts."],
   ["2.0.4", "Deck: Cancel in search now works on iPhone."],
   ["2.0.3", "Deck: search widens when you tap it, with a Cancel button."],

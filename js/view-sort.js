@@ -79,7 +79,7 @@ function piles(pid, s){
     const fly = {most: "fly-right", not: "fly-left", some: "fly-up"}[p];
     if (App.reduced()) return App.render();
     cardBox.style.transition = "transform .28s ease-in, opacity .28s ease-in";
-    cardBox.classList.add(fly);
+    cardBox.classList.add(fly); lean(p);
     setTimeout(App.render, 260);
   }
   let busy = false;
@@ -96,13 +96,14 @@ function piles(pid, s){
     const p = dir(dx, dy, 50);
     stamp.className = "stamp" + (p ? " on " + p : "");
     stamp.textContent = p ? PILES[p].label : "";
+    lean(dir(dx, dy, 20));
   });
   const end = () => {
     if (x0 === null) return; x0 = null;
     const p = moved ? dir(dx, dy, 90) : null;
     if (moved){ cardBox.dataset.dragged = "1"; setTimeout(() => delete cardBox.dataset.dragged, 50); }
     if (p) return put(p);
-    cardBox.style.transition = ""; cardBox.style.transform = ""; stamp.className = "stamp";
+    cardBox.style.transition = ""; cardBox.style.transform = ""; stamp.className = "stamp"; lean(null);
   };
   cardBox.addEventListener("pointerup", end);
   cardBox.addEventListener("pointercancel", end);
@@ -113,8 +114,16 @@ function piles(pid, s){
     return null;
   }
 
+  const ARROW = {not: "back", some: "up", most: "next"};
   const btn = p => h("button", {class: "pile-btn " + p, onclick: () => put(p), "aria-keyshortcuts": PILES[p].key},
-    icon(PILES[p].icon), h("span", {class: "pl"}, PILES[p].label), h("span", {class: "pc", "aria-label": pileIds(s, p).length + " cards"}, pileIds(s, p).length));
+    h("span", {class: "pb-ic"}, icon(PILES[p].icon)), h("span", {class: "pl"}, PILES[p].label),
+    h("span", {class: "pb-dir", "aria-hidden": "true"}, icon(ARROW[p]), p === "some" ? "swipe up" : p === "most" ? "swipe right" : "swipe left"),
+    h("span", {class: "pc", "aria-label": pileIds(s, p).length + " cards"}, pileIds(s, p).length));
+
+  // edge labels around the card show where each swipe goes (same colours as the buttons); they light up while dragging
+  const edge = p => h("div", {class: "edge " + p, "aria-hidden": "true"}, icon(PILES[p].icon), h("span", null, PILES[p].label));
+  const wrap = h("div", {class: "swipe-wrap"}, edge("some"), edge("not"), cardBox, edge("most"));
+  function lean(p){ wrap.className = "swipe-wrap" + (p ? " lean-" + p : ""); }
 
   const onKey = e => {
     if (e.target.closest("input,textarea")) return;
@@ -126,21 +135,15 @@ function piles(pid, s){
   };
   document.addEventListener("keydown", onKey);
 
-  const st = App.state().settings;
-  const hint = st.swipeHint ? h("div", {class: "swipe-hint", role: "note"},
-    h("p", null, h("b", null, "Swipe right"), " = matters most · ", h("b", null, "up"), " = some · ", h("b", null, "left"), " = doesn’t matter. Or use the buttons."),
-    h("button", {class: "btn ghost sm", onclick: e => { st.swipeHint = false; App.save(); e.target.closest(".swipe-hint").remove(); }}, "Got it")) : null;
 
   const pct = Math.round(doneN / total * 100);
   const node = frame(pid, 1, h("div", {class: "sort-body"},
     h("div", {class: "progress", role: "progressbar", "aria-valuemin": 0, "aria-valuemax": total, "aria-valuenow": doneN, "aria-label": "Cards sorted"},
       h("span", {style: {width: pct + "%"}})),
     h("p", {class: "count"}, h("b", null, doneN + 1), " of " + total),
-    h("div", {class: "sort-stage"}, cardBox),
+    h("div", {class: "sort-stage"}, wrap),
     h("div", {class: "caption"}, h("h2", null, App.title(c.name)), h("p", null, c.definition),
-      h("button", {class: "link", onclick: () => cardBox.flip()}, icon("flip"), "Flip for ideas"),
-      h("p", {class: "muted small"}, "Your own meaning counts more than the exact wording.")),
-    hint,
+      h("button", {class: "link", onclick: () => cardBox.flip()}, icon("flip"), "Flip for ideas")),
     h("div", {class: "pile-row"}, btn("not"), btn("some"), btn("most"))), {right: undoBtn});
 
   // preload next images

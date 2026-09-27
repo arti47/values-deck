@@ -989,3 +989,32 @@ html:has(dialog[open]),body:has(dialog[open]){overflow:hidden}
 .handoff h1{overflow-wrap:anywhere}
 .rnum{width:auto;min-width:26px}
 .hranks .rnum{min-width:1.8em;text-align:right}
+
+/* =========================================================
+   2.2 sort step 1: edge labels + direction on buttons
+   ========================================================= */
+.swipe-wrap{position:relative;display:flex;justify-content:center}
+.sort-stage .swipe-wrap .vbox{height:min(calc(100cqh - 40px),calc((100cqw - 96px) / var(--ratio)),540px);margin-top:36px}
+.edge{position:absolute;z-index:1;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;
+  font-family:var(--display);font-weight:700;font-size:.8rem;letter-spacing:.02em;white-space:nowrap;
+  background:var(--surface);box-shadow:inset 0 0 0 2px currentColor;opacity:.85;transition:opacity .15s,transform .15s,background .15s,color .15s;pointer-events:none}
+.edge .i{width:16px;height:16px}
+.edge.not{color:var(--rose-ink);top:calc(50% + 18px);right:calc(50% + var(--half) + 8px);writing-mode:vertical-rl;transform:translateY(-50%) rotate(180deg);padding:12px 6px}
+.edge.most{color:var(--teal-ink);top:calc(50% + 18px);left:calc(50% + var(--half) + 8px);writing-mode:vertical-rl;transform:translateY(-50%);padding:12px 6px}
+.edge.some{color:var(--mustard-ink);top:0;left:50%;transform:translateX(-50%)}
+.edge.not .i,.edge.most .i{transform:rotate(90deg)}
+.swipe-wrap{--half:calc(min(calc(100cqh - 40px),calc((100cqw - 96px) / var(--ratio)),540px) * var(--ratio) / 2)}
+.swipe-wrap.lean-not .edge.not{opacity:1;background:var(--rose-ink);color:#fff;box-shadow:none;transform:translateY(-50%) rotate(180deg) scale(1.08)}
+.swipe-wrap.lean-most .edge.most{opacity:1;background:var(--teal);color:#fff;box-shadow:none;transform:translateY(-50%) scale(1.08)}
+.swipe-wrap.lean-some .edge.some{opacity:1;background:var(--mustard);color:#2b1d05;box-shadow:none;transform:translateX(-50%) scale(1.08)}
+.swipe-wrap.lean-most .edge:not(.most),.swipe-wrap.lean-not .edge:not(.not),.swipe-wrap.lean-some .edge:not(.some){opacity:.3}
+.swipe-wrap.lean-most .edge.most,.swipe-wrap.lean-not .edge.not,.swipe-wrap.lean-some .edge.some{z-index:6}
+:root[data-theme="dark"] .swipe-wrap.lean-most .edge.most,:root[data-theme="dark"] .swipe-wrap.lean-not .edge.not{color:#0f2229}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .swipe-wrap.lean-most .edge.most,:root:not([data-theme="light"]) .swipe-wrap.lean-not .edge.not{color:#0f2229}}
+
+/* buttons: icon, label, and the matching swipe direction */
+.pile-btn{gap:2px;padding:8px 6px}
+.pb-ic .i{width:24px;height:24px}
+.pb-dir{display:inline-flex;align-items:center;gap:3px;font-size:.68rem;font-weight:600;letter-spacing:.03em;opacity:.8;text-transform:uppercase}
+.pb-dir .i{width:12px;height:12px}
+@media (max-height:700px){.pb-dir{display:none}}
