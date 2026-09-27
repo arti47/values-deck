@@ -19,7 +19,7 @@ function frame(pid, step, body, {onExit, right} = {}){
   const who = pid === "me" ? "" : prof ? prof.name + " · " : "";
   return h("div", {class: "wizard"},
     h("header", {class: "wiz-head"},
-      h("button", {class: "icon-btn", "aria-label": "Save and exit", onclick: onExit || (() => { if (App.inGroup()){ App.flush(); App.lock(); App.go("#/together"); } else App.go("#/"); })}, icon("close")),
+      h("button", {class: "icon-btn", "aria-label": "Save and exit", onclick: onExit || (() => { App.flush(); App.toast("Progress saved. Continue any time."); if (App.inGroup()){ App.lock(); App.go("#/together"); } else App.go("#/"); })}, icon("close")),
       h("div", {class: "steps", "aria-label": "Step " + step + " of 3"},
         [1, 2, 3].map(n => h("span", {class: n < step ? "done" : n === step ? "on" : ""}, n)),
         h("p", {class: "steps-label"}, who + ["Sort", "Choose 10", "Rank"][step - 1])),

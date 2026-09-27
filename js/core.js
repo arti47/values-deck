@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "1.8.1";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "1.8.2";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["1.8.2", "Smoother sorting (no flicker), clearer disabled buttons, tidier card picker, “Progress saved” when leaving a sort."],
   ["1.8.1", "Deck: filter bar only shows when there is something to filter."],
   ["1.8.0", "Polish: sort screen fits every phone, Back always visible while scrolling, clearer ratings, smoother pages, tab bar hides while typing."],
   ["1.7.0", "Sort together is now for everyone on the device: start it from “Who’s using?” or Home. Each person sorts into their own profile. Old guests became people."],
@@ -504,7 +505,10 @@ App.render = () => {
   const tab = view.tab || name || "home";
   App.$$("#tabbar a").forEach(a => { if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   App.$$(".seg.scroll, .tabs", main).forEach(App.scrollHint);
-  if (!App.reduced()){ main.classList.remove("enter"); void main.offsetWidth; main.classList.add("enter"); }
+  // fade in only when the page actually changes (not on in-page re-renders such as each sorted card)
+  if (path !== App._lastPath && !App.reduced()){ main.classList.remove("enter"); void main.offsetWidth; main.classList.add("enter"); }
+  else if (path !== App._lastPath) main.classList.remove("enter");
+  App._lastPath = path;
   const t = main.querySelector("h1");
   document.title = (t ? t.textContent + " · " : "") + "Live Your Values";
   window.scrollTo(0, 0);
