@@ -1,8 +1,18 @@
 // Offline cache. Bump VERSION when data or app changes.
-const VERSION = "v1";
+const VERSION = "v2";
 const ASSETS = [
  "./",
  "index.html",
+ "css/app.css",
+ "js/core.js",
+ "js/view-home.js",
+ "js/view-sort.js",
+ "js/view-values.js",
+ "js/view-tools.js",
+ "js/view-together.js",
+ "js/view-deck.js",
+ "js/view-settings.js",
+ "js/app.js",
  "manifest.webmanifest",
  "data/cards.js",
  "icons/icon-192.png",
@@ -85,5 +95,12 @@ self.addEventListener("install", e => e.waitUntil(caches.open(VERSION).then(c =>
 self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  const url = new URL(e.request.url);
+  // images: cache-first; app shell/code: network-first so updates land without a VERSION bump
+  if (url.origin === location.origin && !/\.(jpg|png)$/.test(url.pathname)){
+    e.respondWith(fetch(e.request).then(r => { const c = r.clone(); caches.open(VERSION).then(k => k.put(e.request, c)); return r; })
+      .catch(() => caches.match(e.request, {ignoreSearch: true})));
+    return;
+  }
   e.respondWith(caches.match(e.request, {ignoreSearch: true}).then(r => r || fetch(e.request)));
 });

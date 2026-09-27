@@ -1,6 +1,19 @@
 # Values Deck
 
-Personal HTML5 card-deck viewer for the *Live Your Values* deck (73 cards). Click to flip: image front, text back.
+Phone-first app for the *Live Your Values* deck (73 cards): find, rank and live your core values.
+
+## Features
+- **Sort** (3 steps): swipe/tap into Matters most / some / doesn't matter, pick 10, rank 1-10. Undo, resume, review piles.
+- **My values**: ranked top 10, "also matters" list, tap to flip for ideas.
+- **Journal**: meaning / why / origin per value.
+- **Life check**: rate relationships, work, free time, body & mind per value; heatmap + focus suggestions.
+- **Decide**: per-value prompts, value-conflict helper, final decision.
+- **Reflect**: daily/weekly/monthly check-ins, trend sparklines, Home nudge when due.
+- **History**: dated sorts with rank changes; yearly re-sort nudge.
+- **Together**: pass-the-phone group sorts, compare shared/unique, discussion questions.
+- **Deck**: browse, search, filter by pile, shuffle.
+- **My own cards**: 2 blank cards.
+- **Settings**: theme, text size, check-in frequency, backup/restore JSON, erase.
 
 ## Run
 - **Local:** open `index.html` directly in a browser (no server needed).
@@ -8,20 +21,23 @@ Personal HTML5 card-deck viewer for the *Live Your Values* deck (73 cards). Clic
 - **iPhone/iPad:** serve over https (see below), open in Safari → Share → Add to Home Screen.
 
 ## Controls
-| Action | Input |
+| Where | Input |
 |---|---|
-| Flip | click/tap card, Enter, Space, F, ↑/↓ |
-| Next / prev | ‹ › buttons, ← →, swipe |
-| Shuffle | button or S |
+| Sort | swipe right/up/left, buttons, keys 3/2/1 or arrows, U undo, F flip |
+| Deck | tap/Enter/F flip, arrows or swipe, S shuffle |
 
-Position and shuffle order persist in `localStorage`.
+All data stays in `localStorage`; back up from Settings.
 
 ## Structure
 ```
-index.html              app (single file, no build step)
-data/cards.json         canonical data: {id, name, definition, actions[], image}
-data/cards.js           same data as window.CARDS (lets index.html run from file://)
-data/images/NN_NAME.jpg card fronts, 990×1813
+index.html              app shell
+css/app.css             styles
+js/core.js              core: DOM helper, state, router, dialogs, card component
+js/view-*.js            views (home, sort, values, tools, together, deck, settings)
+js/app.js               boot
+data/cards.json         canonical data
+data/cards.js           same data as window.CARDS (file:// support)
+data/images/NN_NAME.jpg card fronts, 990x1813
 manifest.webmanifest    PWA manifest
 sw.js                   offline cache (http/https only)
 icons/                  app icons
