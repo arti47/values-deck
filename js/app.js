@@ -12,5 +12,17 @@ App.hydrateIcons(document);
 addEventListener("hashchange", App.render);
 App.render();
 if (!App.needsPicker() && !App.state().settings.onboarded) App.onboard();
-if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
+// Offline cache. Auto-reload once when a new version takes over so phones never stay on stale code.
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!hadController || reloaded) return;
+    reloaded = true; App.flush(); location.reload();
+  });
+  navigator.serviceWorker.register("sw.js", {updateViaCache: "none"}).then(reg => {
+    App.swReg = reg;
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
+  }).catch(() => {});
+}
 })();

@@ -687,3 +687,6 @@ p,li,.def,.quote{-webkit-user-select:text;user-select:text}
 .inst-ok{display:flex;align-items:center;gap:8px;color:var(--green);font-family:var(--display);font-weight:600}
 .flash{animation:flash 1.6s ease-out}
 @keyframes flash{0%,30%{box-shadow:0 0 0 4px var(--mustard),var(--shadow)}}
+.user-row{gap:10px 12px;flex-wrap:wrap}
+.user-row .lr-txt{text-decoration:none;color:var(--ink);flex:1 1 calc(100% - 60px)}
+.user-row .btn.sm{flex:1 1 0}

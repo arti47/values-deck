@@ -1,5 +1,5 @@
 // Offline cache. Bump VERSION when data or app changes.
-const VERSION = "v4";
+const VERSION = "v5";
 const ASSETS = [
  "./",
  "index.html",
@@ -97,14 +97,14 @@ const ASSETS = [
  "data/images/72_WISDOM.jpg",
  "data/images/73_WORK_ETHIC.jpg"
 ];
-self.addEventListener("install", e => e.waitUntil(caches.open(VERSION).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())));
+self.addEventListener("install", e => e.waitUntil(caches.open(VERSION).then(c => c.addAll(ASSETS.map(u => new Request(u, {cache: "reload"})))).then(() => self.skipWaiting())));
 self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
   // images: cache-first; app shell/code: network-first so updates land without a VERSION bump
   if (url.origin === location.origin && !/\.(jpg|png|svg)$/.test(url.pathname)){
-    e.respondWith(fetch(e.request).then(r => { const c = r.clone(); caches.open(VERSION).then(k => k.put(e.request, c)); return r; })
+    e.respondWith(fetch(e.request, {cache: "no-cache"}).then(r => { const c = r.clone(); caches.open(VERSION).then(k => k.put(e.request, c)); return r; })
       .catch(() => caches.match(e.request, {ignoreSearch: true})));
     return;
   }

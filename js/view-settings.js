@@ -20,8 +20,10 @@ App.route("settings", (params, q) => {
   if (q && q.get("install")) setTimeout(() => { const el = document.getElementById("install"); if (el){ el.scrollIntoView({behavior: App.reduced() ? "auto" : "smooth", block: "start"}); el.classList.add("flash"); } }, 50);
   return h("div", null,
     App.head("Settings"),
-    h("a", {class: "list-row user-row", href: "#/users"}, App.avatar(App.user()),
-      h("span", {class: "lr-txt"}, h("strong", null, App.user().name), h("span", null, App.users().length > 1 ? App.users().length + " people on this device · switch or manage" : "Add people who share this device")), icon("next")),
+    h("div", {class: "list-row user-row"}, App.avatar(App.user()),
+      h("a", {class: "lr-txt", href: "#/users"}, h("strong", null, App.user().name), h("span", null, App.users().length > 1 ? App.users().length + " people on this device" : "Add people who share this device")),
+      h("button", {class: "btn sm ghost", onclick: () => App.editUser(App.user())}, icon("pen"), "Edit"),
+      h("a", {class: "btn sm ghost", href: "#/users"}, icon("people"), "People")),
     App.installSection(),
     h("section", {class: "set-group"}, h("h2", {class: "h3"}, "Look & feel"),
       h("div", {class: "field"}, h("span", {class: "label"}, "Theme"),
@@ -45,6 +47,13 @@ App.route("settings", (params, q) => {
           App.reset(); App.applySettings(); App.toast("All data erased"); App.go("#/");
         }
       }}, icon("trash"), "Erase my data")),
+    h("div", {class: "center"}, h("button", {class: "link sm", onclick: async () => {
+      if (!App.swReg){ location.reload(); return; }
+      App.toast("Checking for updates…");
+      try{ await App.swReg.update(); }catch(e){}
+      setTimeout(() => location.reload(), 800);
+    }}, icon("download"), "Check for updates")),
+    h("p", {class: "muted small center"}, "Version " + App.VERSION),
     h("p", {class: "muted small center notice"}, "Card text and artwork © Lisa Congdon & Andreea Niculescu / Chronicle Books. Personal use only."));
 });
 
