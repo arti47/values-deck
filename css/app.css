@@ -1082,3 +1082,16 @@ html.lock-scroll .pile-btn,html.lock-scroll .icon-btn,html.lock-scroll .restart-
 .heat-row [role=rowheader] .vn-txt,.side-row .vn-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .side-row .vn-ic,.heat-row .vn-ic{display:none}   /* dense tables: underline only */
 .vname::after{inset:-8px 0}
+
+/* 2.6: share between phones */
+.share h2{margin:2px 40px 6px 0}
+.share-opts{display:grid;gap:2px;margin:6px 0 8px}
+.share-opts .toggle{margin:8px 0}
+.qr-box{width:min(220px,60vw);aspect-ratio:1;margin:8px auto 4px;padding:10px;border-radius:16px;background:#fff;box-shadow:var(--shadow)}
+.qr-box svg{width:100%;height:100%;display:block}
+.share-btns{justify-content:center;margin:10px 0}
+.share-btns .btn{flex:1}
+.share-link{font-size:12px!important;min-height:36px;padding:6px 10px;color:var(--ink-2);font-family:var(--ui)}
+.contact-preview{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin:0 0 16px}
+.contact-preview .avatar{width:40px;height:40px}
+.shared-ic{width:14px!important;height:14px!important;color:var(--teal-ink);vertical-align:-2px}

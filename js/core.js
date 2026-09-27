@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "2.5.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "2.6.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["2.6.0", "Share values between phones with a link or QR code, and compare with people on other phones. Custom cards no longer falsely match in Compare."],
   ["2.5.0", "Tap any value name (Life check, Decide, Reflect, History, Compare) to see its card; tap the card to flip, tap outside to close."],
   ["2.4.2", "Rank screen scrolls again on iPhone (only the ⠿ handle drags)."],
   ["2.4.1", "Swipe up fixed on iPhone: the sort screen no longer scrolls, so upward swipes always work."],
@@ -518,7 +519,7 @@ App.render = () => {
   const [path, qs] = raw.split("?");
   const parts = path.split("/").filter(Boolean).map(decodeURIComponent);
   const name = parts[0] || "";
-  const OPEN = ["who", "together", "handoff", "compare"];   // device-level screens, usable before picking a person
+  const OPEN = ["who", "together", "handoff", "compare"];   // "add" stays gated: a shared link is saved into the chosen person's profile   // device-level screens, usable before picking a person
   const gated = App.needsPicker() && !OPEN.includes(name);
   const fn = gated ? routes.who : (routes[name] || routes[""]);
   if (cleanup){ try{ cleanup(); }catch(e){} cleanup = null; }

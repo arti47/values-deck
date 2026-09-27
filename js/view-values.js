@@ -49,6 +49,7 @@ App.route("values", (params, q) => {
         tool("#/reflect", "sun", "Reflect", "Quick check-in"))),
     someList,
     h("div", {class: "row center gap"},
+      h("button", {class: "btn ghost", onclick: () => App.shareMine()}, icon("upload"), "Share"),
       h("a", {class: "btn ghost", href: "#/history"}, icon("history"), "History"),
       h("a", {class: "btn ghost", href: "#/sort"}, icon("shuffle"), "Sort again")));
 });

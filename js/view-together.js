@@ -33,7 +33,10 @@ App.route("together", () => {
       on ? h("a", {class: "btn sm " + (st.k === "done" ? "ghost" : "primary"), href: "#/handoff/" + u.id},
         st.k === "prog" ? "Resume" : st.k === "done" ? "Redo" : "Start") : null);
   });
-  const ready = g.members.map(id => App.user(id)).filter(u => u && u.share !== false && App.personStatus(u.id).snap);
+  const contacts = me ? App.contacts() : [];
+  const gc = g.contacts || [];
+  const ready = g.members.map(id => App.user(id)).filter(u => u && u.share !== false && App.personStatus(u.id).snap)
+    .concat(contacts.filter(c => gc.includes(c.id)));
 
   const input = h("input", {id: "pname", type: "text", placeholder: "Name", autocomplete: "off", maxlength: 30, enterkeyhint: "done"});
   const addP = e => {
@@ -55,6 +58,20 @@ App.route("together", () => {
     h("form", {class: "add-person", onsubmit: addP},
       h("label", {for: "pname", class: "sr"}, "Add someone new"), input,
       h("button", {class: "btn primary", type: "submit"}, icon("plus"), "Add")),
+    me ? h("section", null, h("h2", {class: "h3"}, "Shared from other phones"),
+      contacts.length ? h("ul", {class: "people group"}, contacts.map(c => h("li", {class: "person" + (gc.includes(c.id) ? "" : " off")},
+        h("label", {class: "pick"},
+          h("input", {type: "checkbox", checked: gc.includes(c.id), "aria-label": "Include " + c.name, onchange: e => {
+            g.contacts = e.target.checked ? gc.concat(c.id) : gc.filter(x => x !== c.id); App.saveGroup(g); App.render(); }}),
+          h("span", {class: "avatar", style: {background: c.color}, "aria-hidden": "true"}, c.name.slice(0, 1).toUpperCase())),
+        h("span", {class: "pinfo"}, h("strong", null, c.name, " ", icon("upload", "shared-ic")), h("span", {class: "pst done"}, c.date ? "Shared · sorted " + App.fmtDate(c.date + "T12:00:00", {day: "numeric", month: "short"}) : "Shared")),
+        h("button", {class: "icon-btn sm", "aria-label": "Remove " + c.name, onclick: async () => {
+          if (await App.confirm("Remove " + c.name + "?", c.name + "’s shared values will be removed from " + App.user().name + "’s profile.", {ok: "Remove", danger: true})){
+            const S = App.state(); S.contacts = App.contacts().filter(x => x.id !== c.id); App.save(); App.render(); }
+        }}, icon("trash"))))) : h("p", {class: "muted small"}, "Someone on another phone can send you their values."),
+      h("div", {class: "row wrap gap-sm"},
+        h("button", {class: "btn ghost", onclick: () => App.pasteShared()}, icon("plus"), "Add shared values"),
+        App.latest() ? h("button", {class: "btn ghost", onclick: () => App.shareMine()}, icon("upload"), "Share mine") : null)) : null,
     h("a", {class: "btn primary block lg" + (ready.length < 2 ? " disabled" : ""), href: ready.length < 2 ? null : "#/compare",
       "aria-disabled": ready.length < 2 ? "true" : null, onclick: e => { if (ready.length < 2){ e.preventDefault(); App.toast("At least 2 people need to finish their sort."); } }},
       icon("people"), ready.length >= 2 ? "Compare " + ready.length + " people" : "Compare values"),
@@ -90,7 +107,16 @@ App.route("compare", () => {
   // group members who have sorted and share their top 10
   const all = g.members.map(id => App.user(id)).filter(u => u && u.share !== false)
     .map(u => ({u, st: App.personStatus(u.id)})).filter(x => x.st.snap)
-    .map(({u, st}) => ({id: u.id, name: u.name, color: u.color, top: st.snap.top}));
+    .map(({u, st}) => ({id: u.id, name: u.name, color: u.color, top: st.snap.top}))
+    .concat(App.needsPicker() ? [] : App.contacts().filter(c => (g.contacts || []).includes(c.id)).map(c => ({id: c.id, name: c.name, color: c.color, top: c.top, contact: c})));
+  // custom cards (id > 100) are personal: give each person's its own key so different people's customs never "match"
+  const ext = {};
+  all.forEach((p, pi) => { p.top = p.top.map(id => {
+    if (id <= 100) return id;
+    const key = -(pi * 1000 + id);
+    if (p.contact){ const x = p.contact.x[id]; if (x) ext[key] = {id: key, name: x[0].toUpperCase(), definition: x[1], actions: [], image: null, custom: true}; }
+    else { const st = App.peekState(p.id); const c = st && (st.custom || []).find(v => v.id === id); if (c && c.name) ext[key] = {id: key, name: c.name.toUpperCase(), definition: c.definition, actions: c.actions || [], image: null, custom: true, own: p.id === App.user().id ? id : null}; }
+    return key; }); });
   if (all.length < 2) { App.go("#/together"); return h("div"); }
   let sel = (g.selected || all.map(p => p.id)).filter(id => all.some(p => p.id === id));
   if (sel.length < 2) sel = all.map(p => p.id);
@@ -112,13 +138,8 @@ App.route("compare", () => {
   const shared = Object.keys(count).filter(id => count[id] === ppl.length).map(Number);
   const some = Object.keys(count).filter(id => count[id] > 1 && count[id] < ppl.length).map(Number);
   const who = id => ppl.filter(p => p.top.includes(id));
-  const owner = {}; ppl.forEach(p => p.top.forEach(id => { if (id > 100) owner[id] = owner[id] || p.id; }));
-  const cardOf = (id, uid) => {
-    if (id <= 100) return App.card(id);
-    const st = App.peekState(uid || owner[id]); const c = st && (st.custom || []).find(x => x.id === id);
-    return c && c.name ? {id, name: c.name.toUpperCase(), definition: c.definition, actions: c.actions || [], image: null, custom: true} : null;
-  };
-  const chip = (id, uid) => { const c = cardOf(id, uid); return c ? h("button", {class: "chip", onclick: () => id <= 100 ? App.showCard(id) : App.toast(App.title(c.name) + ": " + c.definition)}, App.title(c.name)) : null; };
+  const cardOf = id => id > 0 ? App.card(id) : ext[id] || null;
+  const chip = id => { const c = cardOf(id); return c ? h("button", {class: "chip", onclick: () => id > 0 ? App.showCard(id) : c.own ? App.showCard(c.own) : App.toast(App.title(c.name) + ": " + c.definition)}, App.title(c.name)) : null; };
 
   return h("div", null,
     App.head("Compare", {back: "#/together"}),
@@ -134,13 +155,13 @@ App.route("compare", () => {
       h("div", {class: "uniq"}, tops.map(({p, top}) => {
         const u = top.filter(id => count[id] === 1);
         return h("div", {class: "ucol", style: {"--pc": color(p)}}, h("h3", null, name(p)),
-          u.length ? h("ul", {class: "chips"}, u.map(id => h("li", null, chip(id, p.id)))) : h("p", {class: "muted small"}, "Nothing unique"));
+          u.length ? h("ul", {class: "chips"}, u.map(id => h("li", null, chip(id)))) : h("p", {class: "muted small"}, "Nothing unique"));
       }))),
     h("section", {class: "cmp"}, h("h2", {class: "h3"}, "Side by side"),
       h("div", {class: "side", role: "table", "aria-label": "Rankings side by side"},
         h("div", {role: "row", class: "side-row head"}, h("span", {role: "columnheader"}, "#"), tops.map(({p}) => h("span", {role: "columnheader"}, h("span", {class: "dot", style: {background: color(p)}, "aria-hidden": "true"}), " ", name(p)))),
         Array.from({length: 10}, (_, k) => h("div", {role: "row", class: "side-row"}, h("span", {role: "rowheader"}, k + 1),
-          tops.map(({p, top}) => { const c = cardOf(top[k], p.id); const sh = count[top[k]] > 1; return h("span", {role: "cell", class: sh ? "sh" : ""}, c ? (c.id <= 100 || p.id === App.user().id ? App.vname(c) : App.title(c.name)) : ""); }))))),
+          tops.map(({p, top}) => { const c = cardOf(top[k]); const sh = count[top[k]] > 1; return h("span", {role: "cell", class: sh ? "sh" : ""}, c ? (c.id > 0 ? App.vname(c) : App.title(c.name)) : ""); }))))),
     h("section", {class: "cmp"}, h("h2", {class: "h3"}, "Talk about it"),
       h("ol", {class: "qs"}, QUESTIONS.map((q, k) => h("li", null,
         App.field(q, {value: g.notes[k] || "", rows: 2, placeholder: "Notes (optional)", oninput: v => { g.notes[k] = v; App.saveGroup(g); }}))))));

@@ -20,6 +20,7 @@ Personal HTML5 viewer simulating the physical *Live Your Values* card deck. Priv
 - Rename/recolour/delete any person: Edit on Settings user row, `#/users` rows or "Rename or delete people" mode on `#/who` (`App.editUser`); other people's PIN required; names unique; last person can't be deleted.
 - PIN: 4 digits, FNV hash, deterrent only. `share` = include my top 10 in others' Compare (`App.peekCore`).
 - **Sort together is device-level** (not per profile): `#/together` (tick members, add people = `App.addUser`), `#/handoff/<uid>` (PIN if set → `App.switchUser` + sessionStorage `values-deck-group-session`) → `#/sort` in that person's own profile → on finish/exit: `App.lock()` + back to `#/together`. `#/compare` = members with results and `share !== false`; custom cards resolved per owner. Group state in localStorage `values-deck-group` `{members, selected, notes}`. `together/handoff/compare/who` bypass the picker gate. Entry: "Sort together" on `#/who` and Home tile. "Finish & hand back" → lock → picker.
+- **Share between phones (2.6, `js/view-share.js`)**: no server. `App.encodeShare({most,some})` → base64url JSON `{v:1,i:sid,n,c,d,t[],m?,s?,x?{customId:[name,def]}}`; link `…/#/add/<code>` + QR (vendored MIT `js/vendor/qrcode.js`, global `qrcode`). "Share" on My values and Sort together (modal: top 10 always, optional Most/Some, QR, Send link via navigator.share, Copy). `#/add/<code>` (gated → saved into the chosen person) previews and "Add to Compare" → `S.contacts[{id,sid,name,color,date,top,most,some,x}]` (same sid updates), then prompts "Send X your values too?". iOS browser shows a Copy tip (Safari ≠ home-screen app storage); in-app "Add shared values" paste box (clipboard read). Sort together lists "Shared from other phones" (tick for Compare via `group.contacts`, remove). Compare includes ticked contacts of the unlocked person; custom card ids are re-keyed per person (negative keys) so different people's customs never match.
 - Legacy per-profile guests (`profiles[] != me` with snapshots) auto-migrate to device people once (`U.guestsMigrated`).
 - Settings (theme, text, cadence) are per user. Backup/erase = current user only. Storage event from another tab switching user → reload.
 
@@ -31,7 +32,7 @@ Personal HTML5 viewer simulating the physical *Live Your Values* card deck. Priv
 Backup = export/import this JSON (Settings).
 
 ## Routes (hash)
-`#/` home · `#/sort` 3-step wizard (active person) · `#/values` · `#/history` · `#/journal[/id]` · `#/audit/<area|summary>` · `#/decide[/new|/id]` · `#/reflect[/new]` · `#/together` · `#/handoff/pid` · `#/compare` · `#/deck` · `#/custom` · `#/settings` · `#/users` · `#/who` · `#/about` (why values + all booklet uses, linked).
+`#/` home · `#/sort` 3-step wizard (active person) · `#/values` · `#/history` · `#/journal[/id]` · `#/audit/<area|summary>` · `#/decide[/new|/id]` · `#/reflect[/new]` · `#/together` · `#/handoff/pid` · `#/compare` · `#/deck` · `#/custom` · `#/settings` · `#/users` · `#/who` · `#/about` (why values + all booklet uses, linked) · `#/add/<code>` (receive shared values).
 Views return a Node or `{node, focus?, tab?, cleanup?}`; only `focus === true` hides the tab bar (Node#focus is a method: never read options off a bare Node).
 
 ## UI spec
@@ -78,7 +79,7 @@ Toasts render inside an open `<dialog>` (`.toasts-in`) so they stay above modals
 - Always merge to main. Keep this file current with every change.
 
 ## Hosting
-- GitHub Pages via `.github/workflows/pages.yml` on push to main (copies index.html, manifest, sw.js, robots.txt, css, js, icons, data minus cards.json). Add new top-level app files to that copy list.
+- GitHub Pages via `.github/workflows/pages.yml` on push to main (copies index.html, manifest, sw.js, robots.txt, css, js incl. js/vendor, icons, data minus cards.json). Add new top-level app files to that copy list.
 - noindex meta + robots.txt. Site is public by URL.
 
 ## Backlog
