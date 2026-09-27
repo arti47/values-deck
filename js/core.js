@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "1.8.2";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "1.9.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["1.9.0", "Careful polish: better contrast, large-text layouts, no dead ends in Choose 10, no double saves, “Forgot PIN?”, tidier people lists and headers."],
   ["1.8.2", "Smoother sorting (no flicker), clearer disabled buttons, tidier card picker, “Progress saved” when leaving a sort."],
   ["1.8.1", "Deck: filter bar only shows when there is something to filter."],
   ["1.8.0", "Polish: sort screen fits every phone, Back always visible while scrolling, clearer ratings, smoother pages, tab bar hides while typing."],
@@ -379,7 +380,7 @@ App.showCard = (id, list) => {
 
 /* ---------- shared UI bits ---------- */
 App.head = (title, {back, sub, right} = {}) => {
-  const h1 = h("h1", {tabindex: "-1"}, title);
+  const h1 = h("h1", {tabindex: "-1", class: String(title).length > 26 ? "long" : null}, title);
   // compact bar that slides in once the big title scrolls away, so Back is always reachable
   const mini = h("div", {class: "minibar", "aria-hidden": "true"},
     back ? h("a", {class: "icon-btn", href: back, tabindex: "-1"}, icon("back")) : h("span", {class: "icon-btn ghost-slot"}),

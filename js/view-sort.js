@@ -225,6 +225,12 @@ function pick(pid, s){
   const someSec = h("section", {class: "pick-some"},
     h("h2", {class: "h3"}, "From Matters some"),
     h("ul", {class: "tiles"}, some.map(tile)));
+  // never a dead end: if Most + Some can't make 10, the Doesn't-matter pile is offered too
+  const not = pileIds(s, "not");
+  const needNot = most.length + some.length < 10 || s.picked.some(id => not.includes(id));
+  const notSec = needNot && not.length ? h("section", {class: "pick-some"},
+    h("h2", {class: "h3"}, "From Doesn’t matter"),
+    h("ul", {class: "tiles"}, not.map(tile))) : null;
   const toggleSome = h("button", {class: "btn ghost block", onclick: () => { showSome = !showSome; someSec.hidden = !showSome; toggleSome.textContent = showSome ? "Hide Matters some" : "Show Matters some too"; }},
     showSome ? "Hide Matters some" : "Show Matters some too");
   someSec.hidden = !showSome;
@@ -234,6 +240,7 @@ function pick(pid, s){
     h("ul", {class: "tiles"}, most.map(tile)),
     some.length ? toggleSome : null,
     someSec,
+    notSec,
     h("div", {class: "wiz-foot sticky"},
       h("button", {class: "btn ghost", onclick: () => { s.stage = "piles"; App.save(); App.render(); }}, icon("back"), "Back"),
       counter, cont)));
@@ -311,6 +318,7 @@ function rank(pid, s){
 
 function finish(pid, s){
   const S = App.state();
+  if (S.sorts[pid] !== s) return;   // already saved (double tap)
   const snap = {
     id: App.uid(), profile: pid, date: new Date().toISOString(),
     top: s.ranked.slice(),

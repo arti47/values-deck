@@ -158,6 +158,9 @@ App.route("decide", (params) => {
         }}, icon("trash"), "Delete"),
         h("a", {class: "btn primary", href: "#/decide"}, icon("check"), "Done")));
   }
+  // tidy: drop decisions that were opened but never filled in
+  const filled = d => [d.title, d.choice, d.tension].some(v => v && v.trim()) || Object.values(d.answers || {}).some(v => v && v.trim());
+  if (S.decisions.some(d => !filled(d))){ S.decisions = S.decisions.filter(filled); App.save(); }
   return h("div", null,
     App.head("Decide", {back: "#/", sub: "Facing a choice, especially one with mixed feelings? Lay out your 10 values and ask how you can decide in a way that honors each."}),
     h("a", {class: "btn primary block lg", href: "#/decide/new"}, icon("plus"), "New decision"),
@@ -181,6 +184,7 @@ App.route("reflect", (params) => {
     const per = {daily: "today", weekly: "this week", monthly: "this month"}[S.settings.cadence];
     const save = h("button", {class: "btn primary lg", onclick: () => {
       if (!Object.keys(r.scores).length){ App.toast("Rate at least one value first."); return; }
+      if (save.disabled) return; save.disabled = true;   // no double save
       S.reflections.push(Object.assign({id: App.uid(), date: new Date().toISOString(), cadence: S.settings.cadence}, r));
       App.save(true); App.confetti(); App.toast("Check-in saved"); App.go("#/reflect");
     }}, icon("check"), "Save check-in");

@@ -7,7 +7,7 @@ let managing = false;   // "Who's using?" edit mode
 App.avatar = (u, cls) => h("span", {class: "avatar " + (cls || ""), style: {background: u.color}, "aria-hidden": "true"}, (u.name || "?").slice(0, 1).toUpperCase());
 
 /* PIN pad; resolves true when the entered PIN matches (or on set: resolves the new PIN) */
-App.pinPad = (title, {check, set} = {}) => new Promise(res => {
+App.pinPad = (title, {check, set, forgot} = {}) => new Promise(res => {
   let val = "", done = false, first = null;
   const dots = h("div", {class: "pin-dots", "aria-hidden": "true"});
   const msg = h("p", {class: "pin-msg", "aria-live": "assertive"});
@@ -31,7 +31,8 @@ App.pinPad = (title, {check, set} = {}) => new Promise(res => {
   }, "aria-label": d === "del" ? "Delete" : d}, d === "del" ? icon("back") : d);
   const box = h("div", {class: "pin"},
     h("h2", null, title), msg, dots, hidden,
-    h("div", {class: "pin-grid"}, ["1","2","3","4","5","6","7","8","9"].map(key), h("span"), key("0"), key("del")));
+    h("div", {class: "pin-grid"}, ["1","2","3","4","5","6","7","8","9"].map(key), h("span"), key("0"), key("del")),
+    forgot ? h("button", {class: "link sm pin-forgot", type: "button", onclick: () => { fin(false); setTimeout(forgot, 250); }}, "Forgot PIN?") : null);
   msg.textContent = set ? "Choose a 4-digit PIN" : "Enter your PIN";
   const close = App.modal(box, {label: title, cls: "small"});
   box.closest("dialog").addEventListener("close", () => { if (!done){ done = true; res(false); } });
@@ -42,7 +43,7 @@ App.pinPad = (title, {check, set} = {}) => new Promise(res => {
 async function enter(u){
   managing = false;
   if (u.pin){
-    const ok = await App.pinPad("Hi " + u.name, {check: p => App.hashPin(p) === u.pin});
+    const ok = await App.pinPad("Hi " + u.name, {check: p => App.hashPin(p) === u.pin, forgot: () => App.forgotPin(u)});
     if (!ok) return;
   }
   App.switchUser(u.id);
@@ -70,6 +71,14 @@ function addForm(after){
     h("div", {class: "field"}, h("span", {class: "label"}, "Colour"), sw),
     h("button", {class: "btn primary block", type: "submit"}, icon("plus"), "Add person"));
 }
+
+/* A forgotten PIN can't be recovered (it's only stored hashed). The way out is starting that profile again. */
+App.forgotPin = async u => {
+  if (App.users().length < 2){ App.toast("Ask whoever set the PIN, or clear this site’s data in the browser settings."); return; }
+  if (await App.confirm("Forgot " + u.name + "’s PIN?", "A PIN can’t be recovered. You can delete " + u.name + "’s profile and add them again. All of " + u.name + "’s values, notes and check-ins will be deleted.", {ok: "Delete profile", danger: true})){
+    App.removeUser(u.id); App.lock(); App.toast(u.name + "’s profile deleted"); App.go("#/who"); App.render();
+  }
+};
 
 /* Edit any person: rename, recolour, delete. Other people's PIN is required first. */
 async function editUser(u, after){
@@ -152,8 +161,9 @@ App.route("users", () => {
       App.avatar(u),
       h("span", {class: "pinfo"}, h("strong", null, u.name + (isMe ? " (you)" : "")),
         h("span", {class: "pst"}, [u.pin ? "PIN on" : "No PIN", u.share === false ? "hidden from Compare" : null].filter(Boolean).join(" · "))),
-      isMe ? null : h("button", {class: "btn sm ghost", onclick: () => enter(u)}, "Switch"),
-      h("button", {class: "btn sm ghost", "aria-label": "Edit " + u.name, onclick: () => editUser(u)}, icon("pen"), "Edit"));
+      h("span", {class: "pbtns"},
+        isMe ? null : h("button", {class: "btn sm ghost", onclick: () => enter(u)}, "Switch"),
+        h("button", {class: "btn sm ghost", "aria-label": "Edit " + u.name, onclick: () => editUser(u)}, icon("pen"), "Edit")));
   }));
 
   const nameIn = h("input", {id: "myname", type: "text", value: me.name, maxlength: 30, autocomplete: "off",

@@ -107,7 +107,7 @@ body.focus-mode .tabbar{display:none}
 .btn.ghost{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
 .btn.ghost:hover{background:var(--surface-2)}
 .btn.danger{background:var(--rose);color:#fff}
-.btn.ghost.danger{background:transparent;color:var(--rose);box-shadow:inset 0 0 0 1.5px var(--rose-soft)}
+.btn.ghost.danger{background:transparent;color:var(--rose-ink);box-shadow:inset 0 0 0 1.5px var(--rose-soft)}
 .btn:disabled,.btn.disabled{opacity:.45;box-shadow:none}
 .btn.block{display:flex;width:100%}
 .btn.lg{min-height:56px;font-size:1.08rem;padding:12px 26px}
@@ -124,7 +124,7 @@ body.focus-mode .tabbar{display:none}
 .ghost-slot{visibility:hidden}
 .link{display:inline-flex;align-items:center;gap:4px;color:var(--teal-ink);font-family:var(--display);font-weight:600;min-height:44px;text-decoration:none}
 .link.sm{font-size:.9rem;min-height:36px}
-.link.danger{color:var(--rose)}
+.link.danger{color:var(--rose-ink)}
 .link .i{width:1.05em;height:1.05em}
 
 /* ---------- page header ---------- */
@@ -386,7 +386,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--teal);bo
 .pile-btn .i{width:26px;height:26px}
 .pile-btn.most{background:var(--teal);color:#fff}
 .pile-btn.some{background:var(--mustard);color:#2b1d05}
-.pile-btn.not{background:var(--surface);color:var(--rose);box-shadow:var(--shadow),inset 0 0 0 2px var(--rose-soft)}
+.pile-btn.not{background:var(--surface);color:var(--rose-ink);box-shadow:var(--shadow),inset 0 0 0 2px var(--rose-soft)}
 .pc{position:absolute;top:6px;right:8px;font-size:.72rem;opacity:.85;font-variant-numeric:tabular-nums}
 
 .review{text-align:center}
@@ -532,7 +532,7 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:var(--teal);bo
 .hranks li{display:flex;align-items:center;gap:10px;min-height:32px}
 .delta{margin-left:auto;font-family:var(--display);font-weight:700;font-size:.82rem;padding:2px 8px;border-radius:99px}
 .delta.up{color:var(--green);background:color-mix(in srgb,var(--green) 16%,transparent)}
-.delta.down{color:var(--rose);background:var(--rose-soft)}
+.delta.down{color:var(--rose-ink);background:var(--rose-soft)}
 .delta.new{color:var(--mustard-ink);background:var(--mustard-soft)}
 
 /* deck */
@@ -821,3 +821,54 @@ section+section{margin-top:8px}
   .brand{margin:0 0 14px}
   .intro .fan{height:150px}.intro .fan img{width:80px}
 }
+
+/* =========================================================
+   1.9 careful polish
+   ========================================================= */
+/* contrast: every text token ≥ 4.5:1 on every surface (WCAG AA) */
+:root{--ink-2:#4f5d64;--ink-3:#5c686e;--rose-ink:#a8412b}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ink-3:#9aabb2;--rose-ink:#e98a74}}
+:root[data-theme="dark"]{--ink-3:#9aabb2;--rose-ink:#e98a74}
+.hc.s0{color:var(--ink-3)}
+.hc.s1{background:#b3452f}
+
+/* tab bar never wraps, whatever the text size */
+.tabbar a span:last-child{font-size:11px;white-space:nowrap;letter-spacing:.02em}
+.tabbar a .i{width:24px;height:24px}
+
+/* section header + link on one line */
+.top3>.row.between .h3{font-size:clamp(.9rem,4vw,1.1rem)}
+.top3>.row.between .link{white-space:nowrap;flex:0 0 auto}
+
+/* long page titles (e.g. a decision) stay calm */
+.phead-row h1.long{font-size:clamp(1.25rem,5.4vw,1.5rem);line-height:1.2}
+.phead-row h1{overflow-wrap:anywhere}
+
+/* Life check summary: aligned labels, readable grid headers */
+.abar{grid-template-columns:minmax(0,7.2em) minmax(0,1fr) 2.2em}
+.abar>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.heat-row.head span{font-size:10px;letter-spacing:0;overflow-wrap:anywhere;hyphens:auto}
+.heat-row{grid-template-columns:minmax(84px,1.4fr) repeat(var(--cols),minmax(44px,1fr))}
+
+/* people rows: long names and buttons wrap gracefully */
+.person{flex-wrap:wrap;row-gap:8px}
+.pinfo{flex:1 1 120px}
+.pinfo strong{overflow-wrap:anywhere}
+.person>.btn,.person>.icon-btn{flex:0 0 auto}
+.people.group .person{flex-wrap:nowrap}
+.side-row [role=columnheader]{display:flex;align-items:center;gap:6px;color:var(--ink)}
+.side-row [role=columnheader] .dot{flex:0 0 auto}
+
+/* benefits: one column when space (or text) is tight */
+.benefits{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+
+/* past check-ins: keep "date · average" together, wrap as a unit */
+.list-row.col summary{display:block;padding-right:24px;position:relative}
+.list-row.col summary::after{position:absolute;right:4px;top:12px}
+
+/* Forgot PIN */
+.pin-forgot{margin:14px auto 0;display:flex;justify-content:center;color:var(--ink-2)}
+
+/* who tiles: long names wrap nicely */
+.who-tile strong{overflow-wrap:anywhere;text-align:center;line-height:1.2}
+.pbtns{display:flex;gap:8px;flex:0 0 auto;margin-left:auto}

@@ -70,7 +70,7 @@ App.route("handoff", (params) => {
   const go = async () => {
     const same = !App.needsPicker() && App.user().id === u.id;
     if (!same && u.pin){
-      const ok = await App.pinPad("Hi " + u.name, {check: p => App.hashPin(p) === u.pin});
+      const ok = await App.pinPad("Hi " + u.name, {check: p => App.hashPin(p) === u.pin, forgot: () => App.forgotPin(u)});
       if (!ok) return;
     }
     App.setGroup(true);
@@ -138,7 +138,7 @@ App.route("compare", () => {
       }))),
     h("section", {class: "cmp"}, h("h2", {class: "h3"}, "Side by side"),
       h("div", {class: "side", role: "table", "aria-label": "Rankings side by side"},
-        h("div", {role: "row", class: "side-row head"}, h("span", {role: "columnheader"}, "#"), tops.map(({p}) => h("span", {role: "columnheader", style: {color: color(p)}}, name(p)))),
+        h("div", {role: "row", class: "side-row head"}, h("span", {role: "columnheader"}, "#"), tops.map(({p}) => h("span", {role: "columnheader"}, h("span", {class: "dot", style: {background: color(p)}, "aria-hidden": "true"}), " ", name(p)))),
         Array.from({length: 10}, (_, k) => h("div", {role: "row", class: "side-row"}, h("span", {role: "rowheader"}, k + 1),
           tops.map(({p, top}) => { const c = cardOf(top[k], p.id); const sh = count[top[k]] > 1; return h("span", {role: "cell", class: sh ? "sh" : ""}, c ? App.title(c.name) : ""); }))))),
     h("section", {class: "cmp"}, h("h2", {class: "h3"}, "Talk about it"),
