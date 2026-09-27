@@ -1,5 +1,5 @@
 // Offline cache. Bump VERSION when data or app changes.
-const VERSION = "v5";
+const VERSION = "v6";
 const ASSETS = [
  "./",
  "index.html",
@@ -13,6 +13,7 @@ const ASSETS = [
  "js/view-deck.js",
  "js/view-settings.js",
  "js/view-users.js",
+ "js/view-about.js",
  "js/app.js",
  "manifest.webmanifest",
  "data/cards.js",
@@ -97,7 +98,11 @@ const ASSETS = [
  "data/images/72_WISDOM.jpg",
  "data/images/73_WORK_ETHIC.jpg"
 ];
-self.addEventListener("install", e => e.waitUntil(caches.open(VERSION).then(c => c.addAll(ASSETS.map(u => new Request(u, {cache: "reload"})))).then(() => self.skipWaiting())));
+self.addEventListener("install", e => e.waitUntil(caches.open(VERSION).then(c => c.addAll(ASSETS.map(u => new Request(u, {cache: "reload"}))))));
+// Pages from before v6 have no Update toast (they auto-reload on controllerchange): take over immediately once.
+self.addEventListener("install", e => e.waitUntil(caches.keys().then(ks => { if (ks.some(k => /^v[1-5]$/.test(k))) return self.skipWaiting(); })));
+// New versions wait until the user taps "Update" in the app toast.
+self.addEventListener("message", e => { if (e.data === "skipWaiting") self.skipWaiting(); });
 self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;

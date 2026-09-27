@@ -12,17 +12,28 @@ App.hydrateIcons(document);
 addEventListener("hashchange", App.render);
 App.render();
 if (!App.needsPicker() && !App.state().settings.onboarded) App.onboard();
-// Offline cache. Auto-reload once when a new version takes over so phones never stay on stale code.
+// Offline cache + updates: a new version installs in the background, then a toast offers "Update".
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")){
-  const hadController = !!navigator.serviceWorker.controller;
-  let reloaded = false;
+  let reloading = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (!hadController || reloaded) return;
-    reloaded = true; App.flush(); location.reload();
+    if (reloading) return; reloading = true; App.flush(); location.reload();
   });
+  const offer = w => {
+    if (!w || !navigator.serviceWorker.controller) return;   // first install: nothing to replace
+    App.toast("A new version is ready.", {id: "update-toast", sticky: true, action: {label: "Update", fn: () => {
+      App.flush(); w.postMessage("skipWaiting");
+      setTimeout(() => { if (!reloading) location.reload(); }, 1500);
+    }}});
+  };
   navigator.serviceWorker.register("sw.js", {updateViaCache: "none"}).then(reg => {
     App.swReg = reg;
+    if (reg.waiting) offer(reg.waiting);
+    reg.addEventListener("updatefound", () => {
+      const w = reg.installing;
+      w && w.addEventListener("statechange", () => { if (w.state === "installed") offer(w); });
+    });
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
+    setInterval(() => reg.update().catch(() => {}), 30 * 60 * 1000);
   }).catch(() => {});
 }
 })();

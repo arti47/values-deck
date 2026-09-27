@@ -3,7 +3,7 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "1.4.0";   // shown in Settings; bump with sw.js VERSION
+App.VERSION = "1.5.0";   // shown in Settings; bump with sw.js VERSION
 
 /* ---------- DOM ---------- */
 function h(tag, attrs, ...kids){
@@ -229,9 +229,16 @@ App.announce = msg => { const l = App.$("#live"); l.textContent = ""; setTimeout
 App.toast = (msg, opts = {}) => {
   const t = h("div", {class: "toast", role: "status"}, h("span", null, msg));
   if (opts.action){ t.append(h("button", {class: "toast-act", onclick: () => { opts.action.fn(); t.remove(); }}, opts.action.label)); }
-  const box = App.$("#toasts"); box.removeAttribute("aria-hidden"); box.append(t);
+  // toasts must sit above modal dialogs (top layer): render inside the open dialog when there is one
+  const dlg = App.$$("dialog[open]").pop();
+  let box = App.$("#toasts");
+  if (dlg){ box = dlg.querySelector(":scope > .toasts-in") || dlg.appendChild(h("div", {class: "toasts-in"})); }
+  box.removeAttribute("aria-hidden"); box.append(t);
   App.announce(msg);
+  if (opts.id){ const prev = document.getElementById(opts.id); if (prev) prev.remove(); t.id = opts.id; }
+  if (opts.sticky){ t.classList.add("sticky"); t.append(h("button", {class: "toast-x", "aria-label": "Dismiss", onclick: () => t.remove()}, icon("close"))); return t; }
   setTimeout(() => { t.classList.add("out"); setTimeout(() => t.remove(), 300); }, opts.ms || 3200);
+  return t;
 };
 App.reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 App.vibrate = ms => { try{ navigator.vibrate && navigator.vibrate(ms); }catch(e){} };
@@ -404,10 +411,12 @@ App.render = () => {
   if (cleanup){ try{ cleanup(); }catch(e){} cleanup = null; }
   App.$$("dialog.modal").forEach(d => { d.close(); d.remove(); });
   const main = App.$("#main");
-  const view = fn(parts.slice(1), new URLSearchParams(qs || "")) || {};
-  main.replaceChildren(view.node || view);
-  main.className = "view view-" + (name || "home") + (view.focus ? " focus" : "");
-  document.body.classList.toggle("focus-mode", !!view.focus);
+  const res = fn(parts.slice(1), new URLSearchParams(qs || "")) || {};
+  // a view returns either a Node or {node, focus, tab, cleanup}; a bare Node must not be read as options (Node#focus is a method)
+  const view = res instanceof Node ? {node: res} : res;
+  main.replaceChildren(view.node || h("div"));
+  main.className = "view view-" + (name || "home") + (view.focus === true ? " focus" : "");
+  document.body.classList.toggle("focus-mode", view.focus === true);
   cleanup = view.cleanup || null;
   const tab = view.tab || name || "home";
   App.$$("#tabbar a").forEach(a => { if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });

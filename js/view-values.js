@@ -37,7 +37,7 @@ App.route("values", (params, q) => {
   return h("div", null,
     App.head(fresh ? "Your core values" : "My values", {sub: "Sorted " + App.fmtDate(snap.date) + ". Tap any value for ideas.",
       right: h("a", {class: "icon-btn", href: "#/history", "aria-label": "History"}, icon("history"))}),
-    fresh ? h("div", {class: "celebrate", role: "status"}, icon("sparkle"), h("p", null, h("strong", null, "Beautiful. "), "These are the values that make you, you. Here’s what you can do next.")) : null,
+    fresh ? h("div", {class: "celebrate", role: "status"}, icon("sparkle"), h("p", null, h("strong", null, "Beautiful. "), "You now know your top 10 core values, and even your top 3 and your number 1. Use them as a filter for decisions big and small.")) : null,
     inProg ? resume() : null,
     hero, grid,
     h("section", {class: "next-steps"},
@@ -100,7 +100,7 @@ App.route("history", (params) => {
     App.head("History", {back: "#/values", sub: "See how your values shift over time."}),
     h("div", {class: "callout"}, icon("clock"), h("p", null,
       age >= 365 ? "It’s been over a year since your last sort. A great time to sort again." :
-      "Tip: sort again once a year, like on your birthday, to see how you’ve grown.")),
+      "Tip: sort again once a year (like on your birthday) or every five years to see how you’ve grown. Core values mostly stay stable, but they can shift with life.")),
     list,
     h("a", {class: "btn primary block", href: "#/sort"}, "Sort again"));
 });

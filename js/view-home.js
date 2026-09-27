@@ -39,7 +39,8 @@ App.route("", () => {
           App.tool("#/deck", "cards", "Browse the deck", "Flip through all 73 cards"),
           App.tool("#/together", "people", "Sort together", "Pass the phone with friends"),
           App.tool("#/custom", "plus", "Add your own", "2 blank cards for your values"),
-          App.tool("#/settings", "gear", "Settings", "Theme, text size, backup"))));
+          App.tool("#/about", "info", "Why values?", "How the deck helps")),
+        App.quote()));
   }
 
   const due = App.checkinDue();
@@ -68,7 +69,10 @@ App.route("", () => {
         App.tool("#/together", "people", "Together", "Compare with others"),
         App.tool("#/history", "history", "History", "How your values change"),
         App.tool("#/deck", "cards", "Browse deck", "All 73 cards"),
-        App.tool("#/custom", "plus", "My own cards", "Add missing values"))));
+        App.tool("#/custom", "plus", "My own cards", "Add missing values"),
+        App.tool("#/about", "info", "Why values?", "All the ways to use them"),
+        App.tool("#/settings", "gear", "Settings", "Theme, people, backup"))),
+    App.quote());
 });
 
 /* ---------- onboarding ---------- */

@@ -29,7 +29,7 @@ App.route("journal", (params) => {
   }
   const done = c => JQ.filter(([k]) => (J[c.id] || {})[k] && J[c.id][k].trim()).length;
   return h("div", null,
-    App.head("Journal", {back: "#/", sub: "Dig deeper. Write what each value means to you, and why."}),
+    App.head("Journal", {back: "#/", sub: "Dig deeper. Write what each value means to you, why it matters, and where it came from. Your meaning can differ from the card’s definition."}),
     h("ol", {class: "list"}, core.map((c, k) => {
       const n = done(c);
       return h("li", null, h("a", {class: "list-row", href: "#/journal/" + c.id},
@@ -148,7 +148,7 @@ App.route("decide", (params) => {
           placeholder: "How can I honor " + App.title(c.name).toLowerCase() + " here?", oninput: v => { d.answers[c.id] = v; touch(); }})))),
       h("section", {class: "card-sec"},
         h("h2", {class: "h3"}, "Values pulling in different directions?"),
-        h("p", {class: "muted small"}, "Example: Adventure says “go on the trip”, Solitude says “stay home”. You could go, and ask for time alone."),
+        h("p", {class: "muted small"}, "Example: Adventure says “go on the trip”, Solitude says “stay home”. There’s no perfect decision. Honor what you need most right now: you could go, and tell friends ahead of time that you’ll need some time alone."),
         h("div", {class: "row wrap gap"}, h("label", {class: "sel"}, h("span", null, "This value"), selA), h("span", {class: "vs"}, "vs"), h("label", {class: "sel"}, h("span", null, "that value"), selB)),
         App.field("What matters most right now? How could you honor both?", {value: d.tension, rows: 2, oninput: v => { d.tension = v; touch(); }})),
       App.field("My decision", {value: d.choice, rows: 2, placeholder: "I’ve decided to…", oninput: v => { d.choice = v; touch(); }}),
@@ -159,7 +159,7 @@ App.route("decide", (params) => {
         h("a", {class: "btn primary", href: "#/decide"}, icon("check"), "Done")));
   }
   return h("div", null,
-    App.head("Decide", {back: "#/", sub: "Facing a choice? Check it against each of your core values."}),
+    App.head("Decide", {back: "#/", sub: "Facing a choice, especially one with mixed feelings? Lay out your 10 values and ask how you can decide in a way that honors each."}),
     h("a", {class: "btn primary block lg", href: "#/decide/new"}, icon("plus"), "New decision"),
     S.decisions.length ? h("ul", {class: "list"}, S.decisions.map(d => {
       const n = Object.values(d.answers).filter(v => v && v.trim()).length;
@@ -203,7 +203,7 @@ App.route("reflect", (params) => {
   const due = App.checkinDue();
   const recent = R.slice(-12);
   return h("div", null,
-    App.head("Reflect", {back: "#/", sub: "Look back on your day, week or month through your values."}),
+    App.head("Reflect", {back: "#/", sub: "Use your values as a filter to look back on your day, week or month. Living your values is a daily or weekly habit, not a once-a-year thing."}),
     h("div", {class: "field"}, h("span", {class: "label"}, "How often?"),
       App.segmented("cad", [["daily", "Daily"], ["weekly", "Weekly"], ["monthly", "Monthly"]], S.settings.cadence, v => { S.settings.cadence = v; App.save(); App.render(); }, "Check-in frequency")),
     h("div", {class: "checkin-cta" + (due ? " due" : "")},

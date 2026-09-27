@@ -43,7 +43,12 @@ function intro(pid){
         h("li", null, h("strong", null, "Choose 10 "), "from your Matters most pile."),
         h("li", null, h("strong", null, "Rank them "), "from 1 to 10.")),
       h("div", {class: "callout"}, icon("info"),
-        h("p", null, "Choose ", h("em", null, "who you are today"), ", not who you think you should be. Go with your first instinct.")),
+        h("div", null,
+          h("p", null, "Choose ", h("em", null, "who you are today"), " at your core, not who you think you should be or wish you were. Leave out your job, relationships and circumstances."),
+          h("p", null, "Go with your first instinct. Don’t overthink it."))),
+      h("div", {class: "callout"}, icon("sun"),
+        h("p", null, "Find a quiet moment and take a few slow, deep breaths before you start.")),
+      h("p", {class: "muted small center"}, "If a card’s definition doesn’t quite match yours, that’s OK. What matters is what the value means to you."),
       had ? h("p", {class: "muted small center"}, "Your last result from " + App.fmtDate(had.date) + " stays in History.") : null),
     h("div", {class: "wiz-foot"},
       h("button", {class: "btn primary block lg", onclick: () => { App.state().sorts[pid] = newSort(); App.save(true); App.render(); }}, "Start sorting")));
@@ -133,7 +138,8 @@ function piles(pid, s){
     h("p", {class: "count"}, h("b", null, doneN + 1), " of " + total),
     h("div", {class: "sort-stage"}, cardBox),
     h("div", {class: "caption"}, h("h2", null, App.title(c.name)), h("p", null, c.definition),
-      h("button", {class: "link", onclick: () => cardBox.flip()}, icon("flip"), "Flip for ideas")),
+      h("button", {class: "link", onclick: () => cardBox.flip()}, icon("flip"), "Flip for ideas"),
+      h("p", {class: "muted small"}, "Your own meaning counts more than the exact wording.")),
     hint,
     h("div", {class: "pile-row"}, btn("not"), btn("some"), btn("most"))), {right: undoBtn});
 

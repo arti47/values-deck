@@ -7,7 +7,7 @@ Personal HTML5 viewer simulating the physical *Live Your Values* card deck. Priv
 - Vanilla HTML/CSS/JS, no build, no deps. Classic `<script>` files (not ES modules) so `file://` works.
 - `index.html` shell → `css/app.css`, `js/core.js` (window.App: `h()` DOM helper, store, cards, router, dialogs, card component), `js/view-*.js` (one route group each), `js/app.js` (boot).
 - Data: `data/cards.js` (`window.CARDS`); `cards.json` canonical.
-- PWA: `manifest.webmanifest` + `sw.js` (images cache-first, code network-first with `no-cache`; http/https only). `updateViaCache:'none'`, update check on app focus, auto-reload on `controllerchange`. `App.VERSION` (core.js) shown in Settings with "Check for updates"; bump it with sw.js VERSION.
+- PWA: `manifest.webmanifest` + `sw.js` (images cache-first, code network-first with `no-cache`; http/https only). `updateViaCache:'none'`, update check on app focus, new SW waits → sticky "A new version is ready [Update]" toast → postMessage `skipWaiting` → reload on `controllerchange` (one-time auto takeover from caches v1–v5). `App.VERSION` (core.js) shown in Settings with "Check for updates"; bump it with sw.js VERSION.
 
 ## Data schema (`data/cards.json`)
 `[{ id:int, name:string (UPPERCASE), definition:string ("to …"), actions:string[], image:"data/images/NN_NAME.jpg" }]`
@@ -29,8 +29,8 @@ Personal HTML5 viewer simulating the physical *Live Your Values* card deck. Priv
 Backup = export/import this JSON (Settings).
 
 ## Routes (hash)
-`#/` home · `#/sort[/pid]` 3-step wizard · `#/values` · `#/history` · `#/journal[/id]` · `#/audit/<area|summary>` · `#/decide[/new|/id]` · `#/reflect[/new]` · `#/together` · `#/handoff/pid` · `#/compare` · `#/deck` · `#/custom` · `#/settings` · `#/users` · `#/who`.
-Views return `{node, focus?, tab?, cleanup?}`; `focus` hides tab bar.
+`#/` home · `#/sort[/pid]` 3-step wizard · `#/values` · `#/history` · `#/journal[/id]` · `#/audit/<area|summary>` · `#/decide[/new|/id]` · `#/reflect[/new]` · `#/together` · `#/handoff/pid` · `#/compare` · `#/deck` · `#/custom` · `#/settings` · `#/users` · `#/who` · `#/about` (why values + all booklet uses, linked).
+Views return a Node or `{node, focus?, tab?, cleanup?}`; only `focus === true` hides the tab bar (Node#focus is a method: never read options off a bare Node).
 
 ## UI spec
 - Phone first; floating bottom tab bar (Home, My values, Deck, Settings).
@@ -40,6 +40,10 @@ Views return `{node, focus?, tab?, cleanup?}`; `focus` hides tab bar.
 - Sort: swipe right=most, up=some, left=not + big buttons, undo, keys 1/2/3, arrows, U, F.
 - A11y: 44px+ targets, focus-visible, ARIA live, radio-group ratings, reduced-motion, forced-colors, text-size setting.
 - Grid lists need `minmax(0,1fr)` columns to avoid overflow from nowrap text.
+
+## Booklet guidance coverage
+All booklet uses/rules are in-app: sort prep (quiet, breaths), "who you are today, not aspirational, independent of job/relationships", first instinct, own-definition OK, 3-step sort, top 10/3/1, card-back ideas, 2 blank cards, Matters Some view, journal (meaning/why/origin), 4-area life check (incl. no-job note), decision chart + conflict handling, together + 7 questions, reflection daily/weekly/monthly, re-sort yearly/5 years, benefits, people/schedule tips, quotes (`App.quote`).
+Toasts render inside an open `<dialog>` (`.toasts-in`) so they stay above modals.
 
 ## Install / native feel
 - `manifest.webmanifest` (standalone, portrait, maskable icon). Icons generated from `icons/icon.svg` (192, 512, maskable-512, apple-touch 180, favicon-32).

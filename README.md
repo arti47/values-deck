@@ -13,6 +13,8 @@ Phone-first app for the *Live Your Values* deck (73 cards): find, rank and live 
 - **Together**: pass-the-phone group sorts, compare shared/unique, discussion questions.
 - **Deck**: browse, search, filter by pile, shuffle.
 - **My own cards**: 2 blank cards.
+- **Why values**: benefits, every way to use the deck (linked), quotes.
+- **Updates**: "A new version is ready" toast with an Update button.
 - **Multiple users**: "Who's using?" picker, per-person private data, optional 4-digit PIN, compare with others on the device.
 - **Settings**: theme, text size, check-in frequency, backup/restore JSON, erase.
 
