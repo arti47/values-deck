@@ -195,18 +195,21 @@ function pilesReview(pid, s){
   const msg = most >= 10
     ? `You have ${most} in Matters most. Next, you’ll narrow them to your top 10.`
     : `You have ${most} in Matters most. That’s fewer than 10, so next you can add some from Matters some.`;
+  const adj = !!s.adjust;
   return frame(pid, 1, h("div", {class: "sort-body review"},
-    h("div", {class: "done-badge", "aria-hidden": "true"}, icon("check")),
-    h("h1", {tabindex: "-1"}, "All cards sorted"),
-    h("p", {class: "lead"}, msg),
-    h("p", {class: "muted small"}, "Tap any value to move it to another pile."),
+    h("div", {class: "done-badge", "aria-hidden": "true"}, icon(adj ? "pen" : "check")),
+    h("h1", {tabindex: "-1"}, adj ? "Adjust your piles" : "All cards sorted"),
+    h("p", {class: "lead"}, adj ? "Here’s your last sort. Tap any value to move it to another pile, then continue to update your top 10." : msg),
+    adj ? null : h("p", {class: "muted small"}, "Tap any value to move it to another pile."),
     lists,
     h("div", {class: "wiz-foot"},
-      h("button", {class: "btn ghost", onclick: () => { const id = s.log.pop(); delete s.assign[id]; App.save(); App.render(); }}, icon("undo"), "Undo last"),
+      s.log.length ? h("button", {class: "btn ghost", onclick: () => { const id = s.log.pop(); delete s.assign[id]; App.save(); App.render(); }}, icon("undo"), "Undo last") : h("span"),
       h("button", {class: "btn primary lg", onclick: () => {
         s.stage = "pick";
         const m = pileIds(s, "most");
-        s.picked = m.length <= 10 ? m.slice() : [];
+        // adjusting: keep the previous top 10 that are still in Matters most (in their old order); otherwise the usual rule
+        s.picked = adj ? s.picked.filter(id => m.includes(id)).slice(0, 10) : m.length <= 10 ? m.slice() : [];
+        if (adj && s.picked.length < 10 && m.length <= 10) m.forEach(id => { if (!s.picked.includes(id)) s.picked.push(id); });
         App.save(); App.render();
       }}, "Continue", icon("next")))));
 }
@@ -432,6 +435,22 @@ App.swipeTutorial = () => {
     // no motion: show all three at once
     cap.replaceChildren(h("strong", null, "Swipe right"), " = Matters most · ", h("strong", null, "up"), " = Matters some · ", h("strong", null, "left"), " = Doesn’t matter");
   } else loop();
+};
+
+/* Adjust my values: start a new sort pre-filled from the latest result (only changes need doing; old result stays in History) */
+App.adjustSort = async () => {
+  const S = App.state(), snap = App.latest();
+  if (!snap){ App.go("#/sort"); return; }
+  if (S.sorts.me && !(await App.confirm("Replace the sort in progress?", "You have an unfinished sort. Adjusting starts from your saved values instead.", {ok: "Adjust saved values", danger: true}))) return;
+  const assign = {};
+  snap.top.concat(snap.most).forEach(id => assign[id] = "most");
+  snap.some.forEach(id => assign[id] = "some");
+  snap.not.forEach(id => assign[id] = "not");
+  Object.keys(assign).forEach(id => { if (!App.card(+id)) delete assign[id]; });
+  S.sorts.me = {stage: "piles", assign, log: [], picked: snap.top.filter(id => App.card(id)), ranked: snap.top.filter(id => App.card(id)), started: new Date().toISOString(), adjust: true};
+  S.settings.swipeTutorialSeen = true;
+  App.save(true);
+  App.go("#/sort");
 };
 
 App.route("sort", (params) => {
