@@ -955,3 +955,17 @@ body.typing .deck.view-grid .pager-g{bottom:calc(10px + env(safe-area-inset-bott
 .deck.view-card .deck-stage .vbox{height:min(100cqh,calc(100cqw / var(--ratio)),720px);width:auto;margin:0 auto}
 .order select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px}
 .order:focus-within{box-shadow:inset 0 0 0 2px var(--teal),0 0 0 4px var(--teal-soft)}
+/* 2.0.2: one compact top bar — search · order · A–Z · Card|Grid */
+.deck-top{gap:6px}
+.deck-top .search input{padding-left:40px;padding-right:10px;min-width:0}
+.deck-top .search>.i{left:13px}
+.tb-btn{position:relative;flex:0 0 auto;display:grid;place-items:center;width:44px;height:48px;border-radius:999px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink-2);font-family:var(--display);font-weight:700;font-size:.82rem;letter-spacing:.02em;cursor:pointer;transition:background .15s,color .15s}
+.tb-btn .i{width:22px;height:22px}
+.tb-btn:active{transform:scale(.95)}
+.tb-btn.active{background:var(--teal-soft);color:var(--teal-ink);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--teal) 50%,transparent)}
+.tb-btn.order{padding:0;min-height:0}
+.tb-btn.order:focus-within{box-shadow:inset 0 0 0 2px var(--teal),0 0 0 4px var(--teal-soft)}
+.az-btn{width:48px}
+.view-sw{height:48px;align-items:center}
+.view-sw button{width:40px}
+@media (max-width:360px){.view-sw button{width:36px}.tb-btn{width:40px}.az-btn{width:44px}}

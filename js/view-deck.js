@@ -52,7 +52,7 @@ App.route("deck", () => {
   const refilter = () => { cards = list(); D.i = 0; D.page = 0; draw(); App.save(); };
 
   /* ---------- shared controls ---------- */
-  const search = h("input", {type: "search", id: "dq", placeholder: "Search values", value: D.q || "", autocomplete: "off", enterkeyhint: "search",
+  const search = h("input", {type: "search", id: "dq", placeholder: "Search", value: D.q || "", autocomplete: "off", enterkeyhint: "search",
     oninput: e => { D.q = e.target.value.trim(); refilter(); }});
   const viewSw = h("div", {class: "view-sw", role: "radiogroup", "aria-label": "View"},
     [["card", "cards", "Card view"], ["grid", "grid", "Grid view"]].map(([v, ic, lbl]) =>
@@ -67,11 +67,20 @@ App.route("deck", () => {
       App.announce(ORDERS.find(o => o[0] === D.sort)[1]);
     }},
     ORDERS.filter(([v]) => v !== "rank" || hasSnap).map(([v, l]) => h("option", {value: v, selected: D.sort === v}, l)));
-  // whole pill is the tap target: an invisible native select covers it (native picker = easiest on phones)
-  const orderTxt = h("span", {class: "order-txt", "aria-hidden": "true"}, ORDERS.find(o => o[0] === D.sort)[1]);
-  orderSel.addEventListener("change", () => { orderTxt.textContent = ORDERS.find(o => o[0] === D.sort)[1]; orderSel.blur(); });
-  const orderBox = h("div", {class: "order"}, icon("shuffle"), orderTxt, h("span", {class: "chev", "aria-hidden": "true"}, icon("down")), orderSel);
-  const azBtn = h("button", {type: "button", class: "btn ghost sm az-btn", onclick: openAZ, "aria-label": "Jump to letter"}, "A–Z");
+  // compact icon button in the top bar; icon shows the current order; an invisible native select covers it (native picker = easiest on phones)
+  const ORDER_ICON = {deck: "list", rank: "star", shuffle: "shuffle"};
+  const orderName = () => ORDERS.find(o => o[0] === D.sort)[1];
+  const orderIc = h("span", {class: "order-ic"}, icon(ORDER_ICON[D.sort]));
+  const orderBox = h("div", {class: "tb-btn order" + (D.sort !== "deck" ? " active" : ""), title: "Order: " + orderName()}, orderIc, orderSel);
+  orderSel.setAttribute("aria-label", "Order: " + orderName());
+  orderSel.addEventListener("change", () => {
+    orderIc.replaceChildren(icon(ORDER_ICON[D.sort]));
+    orderBox.classList.toggle("active", D.sort !== "deck");
+    orderBox.title = "Order: " + orderName(); orderSel.setAttribute("aria-label", "Order: " + orderName());
+    App.toast("Order: " + orderName());
+    orderSel.blur();
+  });
+  const azBtn = h("button", {type: "button", class: "tb-btn az-btn", onclick: openAZ, "aria-label": "Jump to letter", title: "Jump to letter"}, "A–Z");
 
   /* ---------- card view ---------- */
   function cardView(dir){
@@ -216,8 +225,7 @@ App.route("deck", () => {
 
   /* ---------- assemble ---------- */
   function draw(dir){
-    const toolbar = h("div", {class: "deck-toolbar"}, orderBox, azBtn);
-    body.replaceChildren(toolbar, D.view === "grid" ? gridView(dir) : cardView(dir));
+    body.replaceChildren(D.view === "grid" ? gridView(dir) : cardView(dir));
   }
 
   const onKey = e => {
@@ -237,7 +245,7 @@ App.route("deck", () => {
   const node = h("div", {class: "deck view-" + D.view},
     h("h1", {class: "sr", tabindex: "-1"}, "Deck"),
     h("div", {class: "deck-tools"},
-      h("div", {class: "deck-top"}, h("label", {class: "search"}, icon("search"), h("span", {class: "sr"}, "Search values"), search), viewSw),
+      h("div", {class: "deck-top"}, h("label", {class: "search"}, icon("search"), h("span", {class: "sr"}, "Search values"), search), orderBox, azBtn, viewSw),
       FILTERS.length > 1 ? filters : null),   // only "All" (no sort yet, no own cards) → nothing to filter
     body);
   draw(0);
