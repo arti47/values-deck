@@ -1,5 +1,5 @@
 /* Sort wizard: Step 1 piles (swipe/buttons) → Step 2 pick 10 → Step 3 rank → save snapshot.
-   Route: #/sort (me) or #/sort/<profileId>. */
+   Route: #/sort (always the active person). */
 (function(){
 "use strict";
 const {h, icon} = App;
@@ -19,7 +19,7 @@ function frame(pid, step, body, {onExit, right} = {}){
   const who = pid === "me" ? "" : prof ? prof.name + " · " : "";
   return h("div", {class: "wizard"},
     h("header", {class: "wiz-head"},
-      h("button", {class: "icon-btn", "aria-label": "Save and exit", onclick: onExit || (() => App.go(pid === "me" ? "#/" : "#/together"))}, icon("close")),
+      h("button", {class: "icon-btn", "aria-label": "Save and exit", onclick: onExit || (() => { if (App.inGroup()){ App.flush(); App.lock(); App.go("#/together"); } else App.go("#/"); })}, icon("close")),
       h("div", {class: "steps", "aria-label": "Step " + step + " of 3"},
         [1, 2, 3].map(n => h("span", {class: n < step ? "done" : n === step ? "on" : ""}, n)),
         h("p", {class: "steps-label"}, who + ["Sort", "Choose 10", "Rank"][step - 1])),
@@ -36,7 +36,7 @@ function intro(pid){
       h("button", {class: "icon-btn", "aria-label": "Back", onclick: () => history.back()}, icon("back")), h("span"), h("span", {class: "icon-btn ghost-slot"})),
     h("div", {class: "intro-body"},
       h("div", {class: "fan", "aria-hidden": "true"}, [12, 27, 52].map(n => { const c = App.card(n); return c ? h("img", {src: c.image, alt: ""}) : null; })),
-      h("h1", {tabindex: "-1"}, pid === "me" ? "Find your core values" : prof.name + "’s sort"),
+      h("h1", {tabindex: "-1"}, App.inGroup() ? "Hi " + App.user().name + ", find your core values" : "Find your core values"),
       h("p", {class: "lead"}, "Three quick steps. About 10–15 minutes."),
       h("ol", {class: "howto"},
         h("li", null, h("strong", null, "Sort every card "), "into Matters most, Matters some or Doesn’t matter."),
@@ -322,13 +322,12 @@ function finish(pid, s){
   delete S.sorts[pid];
   App.save(true);
   App.confetti();
-  if (pid === "me") App.go("#/values?new=1");
-  else { App.go("#/together"); App.toast("Saved! Hand the phone back."); }
+  if (App.inGroup()){ App.lock(); App.go("#/together"); App.toast("Saved to " + App.user().name + "’s profile. Pass the phone on."); }
+  else App.go("#/values?new=1");
 }
 
 App.route("sort", (params) => {
-  const pid = params[0] || "me";
-  if (!App.profile(pid)) { App.go("#/together"); return h("div"); }
+  const pid = "me";   // everyone sorts in their own profile (Sort together switches person first)
   const s = sortFor(pid);
   if (!s) return {node: intro(pid), focus: true};
   if (s.stage === "pick") return pick(pid, s);

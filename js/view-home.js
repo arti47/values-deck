@@ -37,7 +37,7 @@ App.route("", () => {
       h("section", null, h("h2", {class: "h3"}, "Or explore"),
         h("div", {class: "tiles-2"},
           App.tool("#/deck", "cards", "Browse the deck", "Flip through all 73 cards"),
-          App.tool("#/together", "people", "Sort together", "Pass the phone with friends"),
+          App.tool("#/together", "people", "Sort together", "Everyone on this phone"),
           App.tool("#/custom", "plus", "Add your own", "2 blank cards for your values"),
           App.tool("#/about", "info", "Why values?", "How the deck helps")),
         App.quote()));
@@ -66,7 +66,7 @@ App.route("", () => {
         App.tool("#/journal", "pen", "Journal", "What each value means to you"))),
     h("section", null, h("h2", {class: "h3"}, "More"),
       h("div", {class: "tiles-2"},
-        App.tool("#/together", "people", "Together", "Compare with others"),
+        App.tool("#/together", "people", "Sort together", "Compare with family & friends"),
         App.tool("#/history", "history", "History", "How your values change"),
         App.tool("#/deck", "cards", "Browse deck", "All 73 cards"),
         App.tool("#/custom", "plus", "My own cards", "Add missing values"),

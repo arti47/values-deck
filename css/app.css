@@ -721,3 +721,6 @@ p,li,.def,.quote{-webkit-user-select:text;user-select:text}
 .changelog li{display:flex;gap:12px;align-items:baseline}
 .changelog .ver{flex:0 0 auto;min-width:52px;padding:2px 8px;border-radius:99px;background:var(--surface-2);font-family:var(--display);font-weight:700;font-size:.82rem;text-align:center}
 .changelog li.cur .ver{background:var(--teal);color:#fff}
+.people.group .pick{display:flex;align-items:center;gap:10px;cursor:pointer}
+.people.group .pick input{width:22px;height:22px;accent-color:var(--teal);flex:0 0 auto}
+.person.off .avatar,.person.off .pinfo{opacity:.5}

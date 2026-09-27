@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "1.6.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "1.7.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["1.7.0", "Sort together is now for everyone on the device: start it from “Who’s using?” or Home. Each person sorts into their own profile. Old guests became people."],
   ["1.6.0", "About this app: version, what’s new, privacy and credits."],
   ["1.5.1", "Better spacing under buttons."],
   ["1.5.0", "Update button when a new version is ready. Tab bar fixed on all pages. Why values page and full booklet guidance."],
@@ -102,6 +103,33 @@ function loadUsers(){
     saveUsers();
   }
   if (!U.users.some(u => u.id === U.active)) U.active = U.users[0].id;
+  if (!U.guestsMigrated) migrateGuests();
+}
+// v1.7: "Together" guests used to live inside one person's state. Turn each guest with results into a device person.
+function migrateGuests(){
+  const add = [];
+  U.users.slice().forEach(owner => {
+    let st; try{ st = JSON.parse(localStorage.getItem(skey(owner.id)) || "null"); }catch(e){ st = null; }
+    if (!st || !Array.isArray(st.profiles)) return;
+    const guests = st.profiles.filter(p => p.id !== "me");
+    if (!guests.length) return;
+    guests.forEach(g => {
+      const snaps = (st.snapshots || []).filter(x => x.profile === g.id);
+      if (!snaps.length) return;
+      let name = (g.name || "Guest").slice(0, 30);
+      while (U.users.concat(add).some(u => u.name.toLowerCase() === name.toLowerCase())) name = name.slice(0, 26) + " (2)";
+      const u = {id: "u" + App.uid(), name, color: g.color || App.COLORS[(U.users.length + add.length) % App.COLORS.length], pin: null, share: true, created: new Date().toISOString()};
+      add.push(u);
+      try{ localStorage.setItem(skey(u.id), JSON.stringify({v: 1, settings: {onboarded: true}, snapshots: snaps.map(x => Object.assign({}, x, {profile: "me"}))})); }catch(e){}
+    });
+    st.profiles = st.profiles.filter(p => p.id === "me");
+    st.snapshots = (st.snapshots || []).filter(x => x.profile === "me");
+    Object.keys(st.sorts || {}).forEach(k => { if (k !== "me") delete st.sorts[k]; });
+    try{ localStorage.setItem(skey(owner.id), JSON.stringify(st)); }catch(e){}
+  });
+  U.users.push(...add);
+  U.guestsMigrated = true;
+  saveUsers();
 }
 // PIN is a privacy deterrent, not security (FNV-1a hash, no server).
 App.hashPin = pin => { let x = 0x811c9dc5; for (const ch of "lyv:" + pin){ x ^= ch.charCodeAt(0); x = Math.imul(x, 0x01000193) >>> 0; } return x.toString(16); };
@@ -133,6 +161,31 @@ App.needsPicker = () => {
   return U.users.length > 1 || !!App.user().pin;
 };
 App.lock = () => { flush(); try{ sessionStorage.removeItem(SESS); }catch(e){} };
+/* Any person's state (the active one from memory, others from storage). */
+App.peekState = id => {
+  if (id === U.active) return S;
+  try{ return JSON.parse(localStorage.getItem(skey(id)) || "null"); }catch(e){ return null; }
+};
+App.personStatus = id => {
+  const st = App.peekState(id);
+  const ss = st && Array.isArray(st.snapshots) ? st.snapshots.filter(x => x.profile === "me") : [];
+  const snap = ss.length ? ss[ss.length - 1] : null;
+  if (st && st.sorts && st.sorts.me) return {k: "prog", t: "Sorting in progress", snap};
+  return snap ? {k: "done", t: "Sorted " + App.fmtDate(snap.date, {day: "numeric", month: "short"}), snap} : {k: "none", t: "Not sorted yet", snap: null};
+};
+/* Sort Together: device-level group (not inside anyone's profile). */
+const GKEY = "values-deck-group", GSESS = "values-deck-group-session";
+App.group = () => {
+  let g = null; try{ g = JSON.parse(localStorage.getItem(GKEY) || "null"); }catch(e){}
+  g = Object.assign({members: null, notes: {}}, g || {});
+  if (!Array.isArray(g.members)) g.members = U.users.map(u => u.id);
+  g.members = g.members.filter(id => App.user(id));
+  return g;
+};
+App.saveGroup = g => { try{ localStorage.setItem(GKEY, JSON.stringify(g)); }catch(e){} };
+App.inGroup = () => { try{ return sessionStorage.getItem(GSESS) === "1"; }catch(e){ return false; } };
+App.setGroup = on => { try{ on ? sessionStorage.setItem(GSESS, "1") : sessionStorage.removeItem(GSESS); }catch(e){} };
+
 // Read another user's latest own snapshot (for Compare), respecting their share flag.
 App.peekCore = id => {
   const u = App.user(id); if (!u || u.share === false || id === U.active) return null;
@@ -417,7 +470,8 @@ App.render = () => {
   const [path, qs] = raw.split("?");
   const parts = path.split("/").filter(Boolean).map(decodeURIComponent);
   const name = parts[0] || "";
-  const gated = App.needsPicker() && name !== "who";
+  const OPEN = ["who", "together", "handoff", "compare"];   // device-level screens, usable before picking a person
+  const gated = App.needsPicker() && !OPEN.includes(name);
   const fn = gated ? routes.who : (routes[name] || routes[""]);
   if (cleanup){ try{ cleanup(); }catch(e){} cleanup = null; }
   App.$$("dialog.modal").forEach(d => { d.close(); d.remove(); });

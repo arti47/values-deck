@@ -19,17 +19,19 @@ Personal HTML5 viewer simulating the physical *Live Your Values* card deck. Priv
 - "Who's using?" picker (`#/who`) gates every route once per browser session (sessionStorage `values-deck-unlocked`) when >1 user or PIN set. Home avatar = switch.
 - Rename/recolour/delete any person: Edit on Settings user row, `#/users` rows or "Rename or delete people" mode on `#/who` (`App.editUser`); other people's PIN required; names unique; last person can't be deleted.
 - PIN: 4 digits, FNV hash, deterrent only. `share` = include my top 10 in others' Compare (`App.peekCore`).
+- **Sort together is device-level** (not per profile): `#/together` (tick members, add people = `App.addUser`), `#/handoff/<uid>` (PIN if set → `App.switchUser` + sessionStorage `values-deck-group-session`) → `#/sort` in that person's own profile → on finish/exit: `App.lock()` + back to `#/together`. `#/compare` = members with results and `share !== false`; custom cards resolved per owner. Group state in localStorage `values-deck-group` `{members, selected, notes}`. `together/handoff/compare/who` bypass the picker gate. Entry: "Sort together" on `#/who` and Home tile. "Finish & hand back" → lock → picker.
+- Legacy per-profile guests (`profiles[] != me` with snapshots) auto-migrate to device people once (`U.guestsMigrated`).
 - Settings (theme, text, cadence) are per user. Backup/erase = current user only. Storage event from another tab switching user → reload.
 
 ## State (per user, single JSON)
-`settings{theme,text,cadence,onboarded,swipeHint}`, `custom[2]`, `profiles[{id,name,color}]` ("me" + pass-the-phone people),
+`settings{theme,text,cadence,onboarded,swipeHint}`, `custom[2]`, `profiles[{id,name,color}]` ("me" only; legacy guests migrated),
 `sorts{pid:{stage:piles|pick|rank,assign{id:most|some|not},log[],picked[],ranked[]}}` (in-progress),
 `snapshots[{id,profile,date,top[10],most[],some[],not[]}]` (latest "me" = core values),
 `journal{id:{meaning,why,origin}}`, `audit{rel|work|leisure|health:{id:{s,n}}}`, `decisions[]`, `reflections[{date,scores{},notes{},note}]`, `group{notes,selected}`, `deck{i,order,filter,q}`.
 Backup = export/import this JSON (Settings).
 
 ## Routes (hash)
-`#/` home · `#/sort[/pid]` 3-step wizard · `#/values` · `#/history` · `#/journal[/id]` · `#/audit/<area|summary>` · `#/decide[/new|/id]` · `#/reflect[/new]` · `#/together` · `#/handoff/pid` · `#/compare` · `#/deck` · `#/custom` · `#/settings` · `#/users` · `#/who` · `#/about` (why values + all booklet uses, linked).
+`#/` home · `#/sort` 3-step wizard (active person) · `#/values` · `#/history` · `#/journal[/id]` · `#/audit/<area|summary>` · `#/decide[/new|/id]` · `#/reflect[/new]` · `#/together` · `#/handoff/pid` · `#/compare` · `#/deck` · `#/custom` · `#/settings` · `#/users` · `#/who` · `#/about` (why values + all booklet uses, linked).
 Views return a Node or `{node, focus?, tab?, cleanup?}`; only `focus === true` hides the tab bar (Node#focus is a method: never read options off a bare Node).
 
 ## UI spec

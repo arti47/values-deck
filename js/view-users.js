@@ -126,7 +126,8 @@ App.route("who", () => {
           h("p", {class: "muted small"}, "Each person gets their own private values, journal and check-ins."),
           addForm(u => { close(); enter(u); })), {label: "Add a person", cls: "small"});
       }}, h("span", {class: "avatar xl ghost"}, icon("plus")), h("strong", null, "Add person"), h("span", {class: "muted small"}, " ")))),
-    h("button", {class: "btn ghost block", onclick: () => { managing = !managing; App.render(); }},
+    managing ? null : h("a", {class: "btn primary block", href: "#/together"}, icon("people"), "Sort together"),
+    h("button", {class: "btn ghost block", style: {marginTop: "10px"}, onclick: () => { managing = !managing; App.render(); }},
       managing ? icon("check") : icon("pen"), managing ? "Done" : "Rename or delete people"),
     h("p", {class: "muted small center"}, managing ? "Tap a person to rename or delete them." : "Everyone’s data stays on this device."));
   return {node, focus: true};
@@ -176,7 +177,7 @@ App.route("users", () => {
           : h("button", {class: "btn ghost", onclick: async () => { const p = await App.pinPad("Set a PIN", {set: true}); if (p){ me.pin = App.hashPin(p); App.saveUsers(); App.unlock(me.id); App.toast("PIN set"); App.render(); } }}, icon("lock"), "Set a PIN")),
       h("label", {class: "toggle"},
         h("input", {type: "checkbox", checked: me.share !== false, onchange: e => { me.share = e.target.checked; App.saveUsers(); }}),
-        h("span", null, h("strong", null, "Show my top 10 in Compare"), h("span", {class: "muted small"}, "Lets others on this device compare values with you in Together."))),
+        h("span", null, h("strong", null, "Show my top 10 in Compare"), h("span", {class: "muted small"}, "Lets others on this device compare values with you in Sort together."))),
       App.users().length > 1 ? h("button", {class: "btn ghost danger block", onclick: async () => {
         if (me.pin){ const ok = await App.pinPad("Confirm with PIN", {check: p => App.hashPin(p) === me.pin}); if (!ok) return; }
         if (await App.confirm("Delete " + me.name + "?", "All of " + me.name + "’s values, notes, decisions and check-ins will be permanently deleted from this device.", {ok: "Delete profile", danger: true})){
