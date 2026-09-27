@@ -115,15 +115,15 @@ function piles(pid, s){
   }
 
   const ARROW = {not: "back", some: "up", most: "next"};
-  const btn = p => h("button", {class: "pile-btn " + p, onclick: () => put(p), "aria-keyshortcuts": PILES[p].key},
-    h("span", {class: "pb-ic"}, icon(PILES[p].icon)), h("span", {class: "pl"}, PILES[p].label),
-    h("span", {class: "pb-dir", "aria-hidden": "true"}, icon(ARROW[p]), p === "some" ? "swipe up" : p === "most" ? "swipe right" : "swipe left"),
+  // compact one-line buttons; the arrow shows the matching swipe direction (← not · ↑ some · most →)
+  const btn = p => h("button", {class: "pile-btn " + p, onclick: () => put(p), "aria-keyshortcuts": PILES[p].key, title: "Or swipe " + {not: "left", some: "up", most: "right"}[p]},
+    p !== "most" ? h("span", {class: "pb-arrow", "aria-hidden": "true"}, icon(ARROW[p])) : null,
+    h("span", {class: "pl"}, PILES[p].label),
+    p === "most" ? h("span", {class: "pb-arrow", "aria-hidden": "true"}, icon(ARROW[p])) : null,
     h("span", {class: "pc", "aria-label": pileIds(s, p).length + " cards"}, pileIds(s, p).length));
 
-  // edge labels around the card show where each swipe goes (same colours as the buttons); they light up while dragging
-  const edge = p => h("div", {class: "edge " + p, "aria-hidden": "true"}, icon(PILES[p].icon), h("span", null, PILES[p].label));
-  const wrap = h("div", {class: "swipe-wrap"}, edge("some"), edge("not"), cardBox, edge("most"));
-  function lean(p){ wrap.className = "swipe-wrap" + (p ? " lean-" + p : ""); }
+  // while dragging, the matching button lights up (and the stamp on the card names the pile)
+  function lean(p){ App.$$(".pile-btn", row).forEach(b => b.classList.toggle("lean", !!p && b.classList.contains(p))); }
 
   const onKey = e => {
     if (e.target.closest("input,textarea")) return;
@@ -137,14 +137,15 @@ function piles(pid, s){
 
 
   const pct = Math.round(doneN / total * 100);
+  const row = h("div", {class: "pile-row"}, btn("not"), btn("some"), btn("most"));
   const node = frame(pid, 1, h("div", {class: "sort-body"},
     h("div", {class: "progress", role: "progressbar", "aria-valuemin": 0, "aria-valuemax": total, "aria-valuenow": doneN, "aria-label": "Cards sorted"},
       h("span", {style: {width: pct + "%"}})),
     h("p", {class: "count"}, h("b", null, doneN + 1), " of " + total),
-    h("div", {class: "sort-stage"}, wrap),
+    h("div", {class: "sort-stage"}, cardBox),
     h("div", {class: "caption"}, h("h2", null, App.title(c.name)), h("p", null, c.definition),
       h("button", {class: "link", onclick: () => cardBox.flip()}, icon("flip"), "Flip for ideas")),
-    h("div", {class: "pile-row"}, btn("not"), btn("some"), btn("most"))), {right: undoBtn});
+    row), {right: undoBtn});
 
   // preload next images
   left.slice(1, 3).forEach(n => { if (n.image) new Image().src = n.image; });
