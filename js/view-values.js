@@ -84,7 +84,7 @@ App.route("history", (params) => {
       h("ol", {class: "hranks"}, s.top.map((id, r) => {
         const c = App.card(id); if (!c) return null;
         const ch = changes && changes.rank[id];
-        return h("li", null, h("span", {class: "rnum"}, r + 1), h("span", null, App.title(c.name)),
+        return h("li", null, h("span", {class: "rnum"}, r + 1), App.vname(c, s.top),
           ch == null ? null : ch === "new" ? h("span", {class: "delta new"}, "New") :
           ch > 0 ? h("span", {class: "delta up", "aria-label": "up " + ch}, "▲" + ch) :
           ch < 0 ? h("span", {class: "delta down", "aria-label": "down " + -ch}, "▼" + -ch) : null);

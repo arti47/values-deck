@@ -140,7 +140,7 @@ App.route("compare", () => {
       h("div", {class: "side", role: "table", "aria-label": "Rankings side by side"},
         h("div", {role: "row", class: "side-row head"}, h("span", {role: "columnheader"}, "#"), tops.map(({p}) => h("span", {role: "columnheader"}, h("span", {class: "dot", style: {background: color(p)}, "aria-hidden": "true"}), " ", name(p)))),
         Array.from({length: 10}, (_, k) => h("div", {role: "row", class: "side-row"}, h("span", {role: "rowheader"}, k + 1),
-          tops.map(({p, top}) => { const c = cardOf(top[k], p.id); const sh = count[top[k]] > 1; return h("span", {role: "cell", class: sh ? "sh" : ""}, c ? App.title(c.name) : ""); }))))),
+          tops.map(({p, top}) => { const c = cardOf(top[k], p.id); const sh = count[top[k]] > 1; return h("span", {role: "cell", class: sh ? "sh" : ""}, c ? (c.id <= 100 || p.id === App.user().id ? App.vname(c) : App.title(c.name)) : ""); }))))),
     h("section", {class: "cmp"}, h("h2", {class: "h3"}, "Talk about it"),
       h("ol", {class: "qs"}, QUESTIONS.map((q, k) => h("li", null,
         App.field(q, {value: g.notes[k] || "", rows: 2, placeholder: "Notes (optional)", oninput: v => { g.notes[k] = v; App.saveGroup(g); }}))))));

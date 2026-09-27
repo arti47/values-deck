@@ -1070,3 +1070,14 @@ html.lock-scroll .pile-btn,html.lock-scroll .icon-btn,html.lock-scroll .restart-
 /* 2.4.2: rank rows scroll normally; only the drag handle captures the finger */
 .rrow{touch-action:pan-y}
 .grip{touch-action:none}
+
+/* 2.5: tappable value names */
+.vname{display:inline-flex;align-items:center;gap:5px;padding:0;min-height:0;font:inherit;color:inherit;text-align:left;cursor:pointer;border-radius:6px;-webkit-tap-highlight-color:transparent;position:relative}
+.vname::after{content:"";position:absolute;inset:-8px -4px}          /* comfortable tap area without changing layout */
+.vn-txt{text-decoration:underline dotted color-mix(in srgb,currentColor 45%,transparent);text-decoration-thickness:1.5px;text-underline-offset:3px}
+.vn-ic{width:.95em!important;height:.95em!important;color:var(--teal-ink);opacity:.75;flex:0 0 auto}
+.vname:hover .vn-txt,.vname:focus-visible .vn-txt{text-decoration-style:solid;text-decoration-color:var(--teal-ink)}
+.vname:active{opacity:.7}
+.heat-row [role=rowheader] .vname,.side-row .vname{max-width:100%}
+.heat-row [role=rowheader] .vn-txt,.side-row .vn-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side-row .vn-ic,.heat-row .vn-ic{display:none}   /* dense tables: underline only */

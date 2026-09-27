@@ -54,6 +54,7 @@ Views return a Node or `{node, focus?, tab?, cleanup?}`; only `focus === true` h
 - Text tokens meet WCAG AA 4.5:1 on all surfaces (light `--ink-2 #4f5d64`, `--ink-3 #5c686e`, `--rose-ink` for red text; never use `--rose` for text). Verify with an automated contrast/tap-target/overflow audit across 375×560 + 390×664, light/dark, text 1 and 1.25.
 - No dead ends: Choose 10 offers Matters some, and Doesn't matter when Most+Some < 10.
 - Touch: only drag handles/cards get `touch-action:none` (`.grip`, `.vbox`, `.demo-card`); list rows must stay `pan-y` or iPhone can't scroll the list (2.4.2).
+- Value names (2.5): use `App.vname(card, ids?)` wherever a value name is listed (Life check rows/heat/focus, Decide, Reflect rows/trends/past, History, Compare side-by-side) → dotted underline + card icon → `App.showCard` (picture first, tap flips, ‹ › through `ids`, ✕/outside closes). Not inside elements that are already links.
 - Start over (2.4): labelled "Restart" pill beside ✕ in the sort header on all 3 steps → confirm (Cancel focused) → replaces only the in-progress sort with `newSort()`; saved snapshots/History untouched.
 - No double saves: `finish()` returns if the sort was already saved; check-in Save disables itself.
 - Empty decisions (opened, never filled) are pruned when the Decide list renders.

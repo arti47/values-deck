@@ -77,7 +77,7 @@ App.route("audit", (params) => {
         App.field("Note on " + App.title(c.name), {value: e.n || "", rows: 2, id: noteId, placeholder: "What’s working? What could change?",
           oninput: v => { (m[c.id] = m[c.id] || {}).n = v; }}));
       return h("li", {class: "rate-row"},
-        h("div", {class: "rr-head"}, h("strong", {id: "l-" + area.id + c.id}, App.title(c.name)),
+        h("div", {class: "rr-head"}, h("strong", {id: "l-" + area.id + c.id}, App.vname(c, core.map(x => x.id))),
           h("button", {class: "link sm", onclick: () => { note.hidden = !note.hidden; if (!note.hidden) note.querySelector("textarea").focus(); }}, icon("pen"), "Note")),
         App.rating("r-" + area.id + "-" + c.id, e.s, v => { (m[c.id] = m[c.id] || {}).s = v; App.save(); }, ALABELS, "l-" + area.id + c.id),
         h("div", {class: "scale-legend", "aria-hidden": "true"}, h("span", null, "Not at all"), h("span", null, "Fully")),
@@ -92,7 +92,7 @@ function summary(core, A){
   const grid = h("div", {class: "heat", role: "table", "aria-label": "Alignment by value and life area", style: {"--cols": AREAS.length}},
     h("div", {role: "row", class: "heat-row head"}, h("span", {role: "columnheader"}, ""), AREAS.map(a => h("span", {role: "columnheader", title: a.name}, a.short))),
     core.map(c => h("div", {role: "row", class: "heat-row"},
-      h("span", {role: "rowheader"}, App.title(c.name)),
+      h("span", {role: "rowheader"}, App.vname(c, core.map(x => x.id))),
       AREAS.map(a => {
         const s = ((A[a.id] || {})[c.id] || {}).s;
         if (s) cells.push({c, a, s});
@@ -113,7 +113,7 @@ function summary(core, A){
     h("div", {class: "heat-legend", "aria-hidden": "true"}, [1, 2, 3, 4, 5].map(n => h("span", {class: "hc s" + n}, n)), h("span", {class: "muted small"}, "1 = not at all · 5 = fully")),
     low.length ? h("section", null, h("h2", {class: "h3"}, "Where to focus"),
       h("ul", {class: "focus-list"}, low.map(({c, a}) => h("li", {class: "focus-item"},
-        h("p", {class: "fhead"}, h("strong", null, App.title(c.name)), " in ", a.name.toLowerCase()),
+        h("p", {class: "fhead"}, h("strong", null, App.vname(c)), " in ", a.name.toLowerCase()),
         c.actions.length ? h("p", null, h("span", {class: "muted"}, "Try this: "), c.actions[(c.id + a.id.length) % c.actions.length]) : null,
         h("button", {class: "link sm", onclick: () => App.showCard(c.id)}, "More ideas", icon("next")))))) :
       h("div", {class: "celebrate"}, icon("sparkle"), h("p", null, "No low scores. Your life and values are well aligned.")));
@@ -144,7 +144,7 @@ App.route("decide", (params) => {
       h("h2", {class: "h3"}, "Go through your values"),
       h("p", {class: "muted small"}, "For each one: how could you make this choice in a way that honors it? Skip any that don’t apply."),
       h("ol", {class: "dlist"}, core.map((c, k) => h("li", null,
-        App.field(h("span", null, h("span", {class: "rank-badge sm"}, k + 1), " ", App.title(c.name)), {value: d.answers[c.id] || "", rows: 2,
+        App.field(h("span", null, h("span", {class: "rank-badge sm"}, k + 1), " ", App.vname(c, core.map(x => x.id))), {value: d.answers[c.id] || "", rows: 2,
           placeholder: "How can I honor " + App.title(c.name).toLowerCase() + " here?", oninput: v => { d.answers[c.id] = v; touch(); }})))),
       h("section", {class: "card-sec"},
         h("h2", {class: "h3"}, "Values pulling in different directions?"),
@@ -197,7 +197,7 @@ App.route("reflect", (params) => {
         const note = h("div", {class: "note", hidden: !r.notes[c.id]}, App.field("Note on " + App.title(c.name), {rows: 2, value: r.notes[c.id] || "", placeholder: "What helped or got in the way?", oninput: v => r.notes[c.id] = v}));
         const rt = App.rating("rf-" + c.id, r.scores[c.id] || null, v => { r.scores[c.id] = v; App.save(); }, RLABELS, "rl-" + c.id);
         return h("li", {class: "rate-row"},
-          h("div", {class: "rr-head"}, h("strong", {id: "rl-" + c.id}, App.title(c.name)),
+          h("div", {class: "rr-head"}, h("strong", {id: "rl-" + c.id}, App.vname(c, core.map(x => x.id))),
             h("button", {class: "link sm", onclick: () => { note.hidden = !note.hidden; if (!note.hidden) note.querySelector("textarea").focus(); }}, icon("pen"), "Note")),
           rt, h("div", {class: "scale-legend", "aria-hidden": "true"}, h("span", null, "Barely"), h("span", null, "Fully")), note);
       })),
@@ -223,7 +223,7 @@ App.route("reflect", (params) => {
       h("ul", {class: "trends"}, core.map(c => {
         const vals = recent.map(r => r.scores[c.id]).filter(Boolean);
         const lastV = vals[vals.length - 1];
-        return h("li", null, h("span", {class: "tn"}, App.title(c.name)), App.spark(vals),
+        return h("li", null, h("span", {class: "tn"}, App.vname(c, core.map(x => x.id))), App.spark(vals),
           h("b", {"aria-label": lastV ? "latest " + lastV + " of 5" : "no data"}, lastV || "–"));
       })),
       h("h2", {class: "h3"}, "Past check-ins"),
@@ -231,7 +231,7 @@ App.route("reflect", (params) => {
         const v = Object.values(r.scores); const avg = v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0;
         return h("li", null, h("details", {class: "list-row col"},
           h("summary", null, h("strong", null, App.fmtDate(r.date)), h("span", {class: "muted"}, " · average " + avg.toFixed(1) + " / 5")),
-          h("ul", {class: "mini"}, Object.keys(r.scores).map(id => { const c = App.card(id); return c ? h("li", null, App.title(c.name) + ": " + r.scores[id] + (r.notes && r.notes[id] ? " — " + r.notes[id] : "")) : null; })),
+          h("ul", {class: "mini"}, Object.keys(r.scores).map(id => { const c = App.card(id); return c ? h("li", null, App.vname(c), ": " + r.scores[id] + (r.notes && r.notes[id] ? " — " + r.notes[id] : "")) : null; })),
           r.note ? h("p", {class: "quote"}, r.note) : null,
           h("button", {class: "link danger sm", onclick: async () => { if (await App.confirm("Delete this check-in?", null, {ok: "Delete", danger: true})){ S.reflections = S.reflections.filter(x => x.id !== r.id); App.save(); App.render(); } }}, "Delete")));
       }))) : h("p", {class: "muted center"}, "Your trends appear after your first check-in."));

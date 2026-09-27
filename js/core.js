@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "2.4.2";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "2.5.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["2.5.0", "Tap any value name (Life check, Decide, Reflect, History, Compare) to see its card; tap the card to flip, tap outside to close."],
   ["2.4.2", "Rank screen scrolls again on iPhone (only the ⠿ handle drags)."],
   ["2.4.1", "Swipe up fixed on iPhone: the sort screen no longer scrolls, so upward swipes always work."],
   ["2.4.0", "Start over: restart a sort from any step (your saved results stay in History)."],
@@ -399,6 +400,11 @@ App.showCard = (id, list) => {
   App.modal(wrap, {label: "Card", cls: "cardview"});
   render();
 };
+
+/* tappable value name → card pop-up (picture first, tap to flip, tap outside/✕ to close) */
+App.vname = (c, ids, text) => c ? h("button", {type: "button", class: "vname", "aria-label": (text || App.title(c.name)) + ", show card",
+    onclick: e => { e.preventDefault(); e.stopPropagation(); App.showCard(c.id, ids && ids.length ? ids : null); }},
+  h("span", {class: "vn-txt"}, text || App.title(c.name)), icon("cards", "vn-ic")) : null;
 
 /* ---------- shared UI bits ---------- */
 App.head = (title, {back, sub, right} = {}) => {
