@@ -969,3 +969,16 @@ body.typing .deck.view-grid .pager-g{bottom:calc(10px + env(safe-area-inset-bott
 .view-sw{height:48px;align-items:center}
 .view-sw button{width:40px}
 @media (max-width:360px){.view-sw button{width:36px}.tb-btn{width:40px}.az-btn{width:44px}}
+/* 2.0.3: expanding search */
+.deck-top>.tb-btn,.deck-top>.view-sw{transition:max-width .25s ease,opacity .2s ease,margin .25s ease,padding .25s ease;max-width:120px;overflow:hidden}
+.deck-top.searching>.tb-btn,.deck-top.searching>.view-sw{max-width:0;opacity:0;margin-left:-6px;padding:0;box-shadow:none;pointer-events:none}
+.search-cancel{flex:0 0 auto;max-width:0;opacity:0;overflow:hidden;white-space:nowrap;min-height:48px;padding:0;color:var(--teal-ink);font-family:var(--display);font-weight:600;font-size:1rem;transition:max-width .25s ease,opacity .2s ease,padding .25s ease;pointer-events:none}
+.deck-top.searching .search-cancel{max-width:90px;opacity:1;padding:0 4px 0 6px;pointer-events:auto}
+.deck-top.searching .search input{border-color:var(--teal);box-shadow:0 0 0 4px var(--teal-soft)}
+@media (prefers-reduced-motion:reduce){.deck-top>*{transition:none!important}}
+.deck-top{gap:0}
+.deck-top>*+*{margin-left:6px}
+.deck-top.searching>.tb-btn,.deck-top.searching>.view-sw{margin-left:0}
+.deck-top>.search-cancel{margin-left:0}
+.deck-top.searching>.search-cancel{margin-left:6px}
+.deck-top.searching>.tb-btn{min-width:0}

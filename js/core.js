@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "2.0.2";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "2.0.3";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["2.0.3", "Deck: search widens when you tap it, with a Cancel button."],
   ["2.0.2", "Deck: order and A–Z buttons moved to the top bar next to Card/Grid."],
   ["2.0.1", "Deck: tapping the order menu no longer hides the bottom menu."],
   ["2.0.0", "Deck grid view: 9 cards per page, page numbers and swipe, press-and-hold to peek, A–Z jump, order by deck, your ranking or shuffle."],

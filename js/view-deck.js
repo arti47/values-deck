@@ -242,10 +242,19 @@ App.route("deck", () => {
   };
   document.addEventListener("keydown", onKey);
 
+  // search expands to the full bar while focused (other buttons slide away, Cancel appears); collapses on leave, text kept
+  const cancel = h("button", {type: "button", class: "search-cancel", tabindex: "-1",
+    onpointerdown: e => e.preventDefault(),   // keep focus so the tap lands before collapse
+    onclick: () => { search.value = ""; if (D.q){ D.q = ""; refilter(); } search.blur(); }}, "Cancel");
+  const top = h("div", {class: "deck-top"}, h("label", {class: "search"}, icon("search"), h("span", {class: "sr"}, "Search values"), search), orderBox, azBtn, viewSw, cancel);
+  search.addEventListener("focus", () => { top.classList.add("searching"); cancel.tabIndex = 0; });
+  search.addEventListener("blur", () => setTimeout(() => { if (document.activeElement !== cancel){ top.classList.remove("searching"); cancel.tabIndex = -1; } }, 80));
+  search.addEventListener("keydown", e => { if (e.key === "Escape") cancel.click(); else if (e.key === "Enter") search.blur(); });
+
   const node = h("div", {class: "deck view-" + D.view},
     h("h1", {class: "sr", tabindex: "-1"}, "Deck"),
     h("div", {class: "deck-tools"},
-      h("div", {class: "deck-top"}, h("label", {class: "search"}, icon("search"), h("span", {class: "sr"}, "Search values"), search), orderBox, azBtn, viewSw),
+      top,
       FILTERS.length > 1 ? filters : null),   // only "All" (no sort yet, no own cards) → nothing to filter
     body);
   draw(0);
