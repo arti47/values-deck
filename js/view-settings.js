@@ -48,16 +48,41 @@ App.route("settings", (params, q) => {
           App.reset(); App.applySettings(); App.toast("All data erased"); App.go("#/");
         }
       }}, icon("trash"), "Erase my data")),
-    h("div", {class: "center"}, h("button", {class: "link sm", onclick: async () => {
-      const reg = App.swReg;
-      if (!reg){ location.reload(); return; }
-      App.toast("Checking for updates…");
-      try{ await reg.update(); }catch(e){}
-      setTimeout(() => { if (!reg.installing && !reg.waiting) App.toast("You have the latest version."); }, 2500);
-    }}, icon("download"), "Check for updates")),
-    h("p", {class: "muted small center"}, "Version " + App.VERSION),
-    h("p", {class: "muted small center notice"}, "Card text and artwork © Lisa Congdon & Andreea Niculescu / Chronicle Books. Personal use only."));
+    aboutApp());
 });
+
+function aboutApp(){
+  const standalone = App.isStandalone && App.isStandalone();
+  return h("section", {class: "set-group about-app", "aria-labelledby": "about-h"},
+    h("h2", {class: "h3", id: "about-h"}, "About this app"),
+    h("div", {class: "app-id"},
+      h("img", {src: "icons/apple-touch-icon.png", alt: "", class: "app-ic"}),
+      h("div", null, h("strong", null, "Live Your Values"),
+        h("span", null, "Version " + App.VERSION),
+        h("span", null, "Updated " + App.fmtDate(App.UPDATED + "T12:00:00") + (standalone ? " · Installed" : "")))),
+    h("div", {class: "row wrap gap-sm"},
+      h("button", {class: "btn ghost sm", onclick: checkUpdates}, icon("download"), "Check for updates"),
+      h("button", {class: "btn ghost sm", onclick: whatsNew}, icon("sparkle"), "What’s new")),
+    h("ul", {class: "about-list"},
+      h("li", null, icon("lock"), h("span", null, h("strong", null, "Private. "), "Everything stays on this device. No accounts, no tracking, no servers.")),
+      h("li", null, icon("people"), h("span", null, App.users().length + (App.users().length === 1 ? " person" : " people") + " on this device.")),
+      h("li", null, icon("heart"), h("span", null, "Based on ", h("em", null, "The Live Your Values Deck"), " by Andreea Niculescu, illustrated by Lisa Congdon (Chronicle Books). Card text and artwork © their owners. Personal use only."))));
+}
+
+async function checkUpdates(){
+  const reg = App.swReg;
+  if (!reg){ App.toast("Updates work when the app is opened from its web address."); return; }
+  App.toast("Checking for updates…");
+  try{ await reg.update(); }catch(e){}
+  setTimeout(() => { if (!reg.installing && !reg.waiting) App.toast("You’re on the latest version (" + App.VERSION + ")."); }, 2500);
+}
+
+function whatsNew(){
+  App.modal(h("div", {class: "confirm"},
+    h("h2", null, "What’s new"),
+    h("ol", {class: "changelog"}, App.CHANGELOG.map(([v, t], k) => h("li", {class: k === 0 ? "cur" : ""},
+      h("span", {class: "ver"}, v), h("span", null, t))))), {label: "What’s new", cls: "small"});
+}
 
 function exportData(){
   const S = App.state();

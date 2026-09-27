@@ -52,6 +52,7 @@ Toasts render inside an open `<dialog>` (`.toasts-in`) so they stay above modals
 
 ## Workflow
 - Rebuild data: `python3 tools/extract_cards.py <epub> --repo .`; bump `sw.js` VERSION on any asset change.
+- Every release: bump `App.VERSION` + `App.UPDATED` + add `App.CHANGELOG` entry (core.js) and bump `sw.js` VERSION. Settings → "About this app" shows version, updated date, Check for updates, What's new, privacy, credits.
 - Always merge to main. Keep this file current with every change.
 
 ## Hosting

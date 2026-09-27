@@ -3,7 +3,18 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "1.5.1";   // shown in Settings; bump with sw.js VERSION
+App.VERSION = "1.6.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.UPDATED = "2026-09-27";
+App.CHANGELOG = [
+  ["1.6.0", "About this app: version, what’s new, privacy and credits."],
+  ["1.5.1", "Better spacing under buttons."],
+  ["1.5.0", "Update button when a new version is ready. Tab bar fixed on all pages. Why values page and full booklet guidance."],
+  ["1.4.0", "Edit your profile directly from Settings. Automatic updates."],
+  ["1.3.0", "Install to home screen on iPhone and Android. Zoom lock. New app icon."],
+  ["1.2.0", "Rename or delete any person."],
+  ["1.1.0", "Multiple people on one device, with optional PIN."],
+  ["1.0.0", "Sort, core values, journal, life check, decide, reflect, history, together, deck, custom cards."]
+];
 
 /* ---------- DOM ---------- */
 function h(tag, attrs, ...kids){

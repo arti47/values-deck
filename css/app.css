@@ -708,3 +708,16 @@ p,li,.def,.quote{-webkit-user-select:text;user-select:text}
 /* spacing: helper text directly after a full-width button */
 .btn.block+p,.btn.block+.muted{margin-top:14px}
 .hero .btn.block{margin-top:18px}
+.app-id{display:flex;align-items:center;gap:14px;margin:4px 0 14px}
+.app-ic{width:60px;height:60px;border-radius:14px;box-shadow:var(--shadow)}
+.app-id div{display:flex;flex-direction:column}
+.app-id strong{font-family:var(--display);font-size:1.15rem}
+.app-id span{color:var(--ink-2);font-size:.9rem}
+.gap-sm{gap:8px}
+.about-list{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:10px;font-size:.9rem;color:var(--ink-2)}
+.about-list li{display:flex;gap:10px;align-items:flex-start}
+.about-list .i{color:var(--teal-ink);margin-top:2px}
+.changelog{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.changelog li{display:flex;gap:12px;align-items:baseline}
+.changelog .ver{flex:0 0 auto;min-width:52px;padding:2px 8px;border-radius:99px;background:var(--surface-2);font-family:var(--display);font-weight:700;font-size:.82rem;text-align:center}
+.changelog li.cur .ver{background:var(--teal);color:#fff}
