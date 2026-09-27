@@ -1096,3 +1096,16 @@ html.lock-scroll .pile-btn,html.lock-scroll .icon-btn,html.lock-scroll .restart-
 .contact-preview .avatar{width:40px;height:40px}
 .shared-ic{width:14px!important;height:14px!important;color:var(--teal-ink);vertical-align:-2px}
 .view-values .row.center.gap{flex-wrap:wrap}
+/* 2.7.1: pile review — see the card, then move it */
+dialog.move-modal{max-width:380px}
+.move-card{display:flex;flex-direction:column;align-items:center;gap:8px}
+.move-card .vbox{height:min(52dvh,calc((100vw - 80px) / var(--ratio)),480px)}
+.move-card .hint{display:inline-flex;align-items:center;gap:6px;margin:2px 0 0;font-family:var(--display);font-size:.85rem;color:var(--ink-2)}
+.move-card .hint .i{width:16px;height:16px}
+.move-now{margin:4px 0 0;font-size:.95rem;color:var(--ink-2)}
+.move-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.move-row .pile-btn{min-height:56px;flex-direction:column;gap:2px;font-size:.82rem}
+.move-row .pile-btn .i{width:20px;height:20px}
+.move-row .pile-btn.current{box-shadow:inset 0 0 0 3px rgba(255,255,255,.9),var(--shadow);filter:brightness(1.05)}
+.move-row .pile-btn.not.current{box-shadow:inset 0 0 0 3px var(--rose-ink),var(--shadow)}
+.pile-list .chip{display:inline-flex;align-items:center;gap:6px}

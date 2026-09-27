@@ -177,19 +177,30 @@ function piles(pid, s){
 function pilesReview(pid, s){
   const lists = ["most", "some", "not"].map(p => {
     const ids = pileIds(s, p);
-    return h("details", {class: "pile-list " + p, open: p === "most"},
+    return h("details", {class: "pile-list " + p, open: true},
       h("summary", null, icon(PILES[p].icon), h("span", null, PILES[p].label), h("span", {class: "badge"}, ids.length)),
       ids.length ? h("ul", {class: "chips"}, ids.map(id => {
         const c = App.card(id);
         return h("li", null, h("button", {class: "chip", onclick: () => move(id)}, App.title(c.name)));
       })) : h("p", {class: "muted small"}, "Empty"));
   });
+  // tap a value: see the real card (picture first, tap to flip) with the pile buttons underneath
   function move(id){
     const c = App.card(id);
-    const body = h("div", {class: "confirm"}, h("h2", null, "Move " + App.title(c.name)),
-      h("p", {class: "muted"}, c.definition),
-      h("div", {class: "stack"}, Object.keys(PILES).map(p => h("button", {class: "btn " + (s.assign[id] === p ? "primary" : "ghost") + " block", onclick: () => { s.assign[id] = p; App.save(); close(); App.render(); }}, icon(PILES[p].icon), PILES[p].label))));
-    const close = App.modal(body, {label: "Move card", cls: "small"});
+    const cardBox = App.cardEl(c);
+    const cur = s.assign[id];
+    const body = h("div", {class: "move-card"},
+      cardBox,
+      h("p", {class: "hint"}, icon("flip"), "Tap the card to flip it"),
+      h("p", {class: "move-now"}, "Now in: ", h("strong", null, PILES[cur].label)),
+      h("div", {class: "move-row", role: "group", "aria-label": "Move to"},
+        ["not", "some", "most"].map(p => h("button", {class: "pile-btn " + p + (cur === p ? " current" : ""), "aria-pressed": String(cur === p),
+          onclick: () => {
+            if (p !== cur){ s.assign[id] = p; App.save(); App.toast(App.title(c.name) + " → " + PILES[p].label); }
+            close(); App.render();
+          }}, icon(PILES[p].icon), h("span", {class: "pl"}, PILES[p].label)))));
+    const close = App.modal(body, {label: App.title(c.name), cls: "small move-modal"});
+    cardBox.card.focus({preventScroll: true});
   }
   const most = pileIds(s, "most").length;
   const msg = most >= 10

@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "2.7.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "2.7.1";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["2.7.1", "Pile review: all piles open; tap a value to see its card (flip for words) and move it."],
   ["2.7.0", "Adjust my values: change a few cards from your last sort without sorting everything again."],
   ["2.6.0", "Share values between phones with a link or QR code, and compare with people on other phones. Custom cards no longer falsely match in Compare."],
   ["2.5.0", "Tap any value name (Life check, Decide, Reflect, History, Compare) to see its card; tap the card to flip, tap outside to close."],
