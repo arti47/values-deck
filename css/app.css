@@ -1095,3 +1095,4 @@ html.lock-scroll .pile-btn,html.lock-scroll .icon-btn,html.lock-scroll .restart-
 .contact-preview{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin:0 0 16px}
 .contact-preview .avatar{width:40px;height:40px}
 .shared-ic{width:14px!important;height:14px!important;color:var(--teal-ink);vertical-align:-2px}
+.view-values .row.center.gap{flex-wrap:wrap}
