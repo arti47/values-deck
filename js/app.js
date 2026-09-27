@@ -7,9 +7,10 @@ if (!App.hasData()){
 }
 App.load();
 App.applySettings();
+if (!App.needsPicker()) App.unlock(App.user().id);
 App.hydrateIcons(document);
 addEventListener("hashchange", App.render);
 App.render();
-if (!App.state().settings.onboarded) App.onboard();
+if (!App.needsPicker() && !App.state().settings.onboarded) App.onboard();
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
 })();

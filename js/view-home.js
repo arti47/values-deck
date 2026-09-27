@@ -8,6 +8,15 @@ function greet(){
   return hr < 5 ? "Hello" : hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
 }
 
+function brand(){
+  const u = App.user();
+  const multi = App.users().length > 1;
+  return h("header", {class: "brand"},
+    h("div", null, h("p", {class: "eyebrow"}, greet() + (multi || u.name !== "Me" ? ", " + u.name : "")), h("h1", {tabindex: "-1"}, "Live Your Values")),
+    h("button", {class: "me-btn", "aria-label": "Signed in as " + u.name + ". Switch person", onclick: () => { App.lock(); App.go("#/who"); }},
+      App.avatar(u), multi ? h("span", {class: "sr"}, "Switch") : null));
+}
+
 App.route("", () => {
   const S = App.state();
   const core = App.core();
@@ -16,7 +25,7 @@ App.route("", () => {
 
   if (!core.length){
     return h("div", {class: "home"},
-      h("header", {class: "brand"}, h("p", {class: "eyebrow"}, greet()), h("h1", {tabindex: "-1"}, "Live Your Values")),
+      brand(),
       inProg ? App.resumeBanner() : null,
       h("section", {class: "hero"},
         h("div", {class: "fan big", "aria-hidden": "true"}, [2, 13, 41].map(n => { const c = App.card(n); return c ? h("img", {src: c.image, alt: ""}) : null; })),
@@ -36,7 +45,7 @@ App.route("", () => {
   const old = snap && App.daysSince(snap.date) >= 365;
   const top3 = core.slice(0, 3);
   return h("div", {class: "home"},
-    h("header", {class: "brand"}, h("p", {class: "eyebrow"}, greet()), h("h1", {tabindex: "-1"}, "Live Your Values")),
+    brand(),
     inProg ? App.resumeBanner() : null,
     due ? h("a", {class: "banner warm", href: "#/reflect/new"}, icon("sun"),
       h("span", null, h("strong", null, "Time for your " + S.settings.cadence +" check-in"), h("span", null, "Two minutes. How did you live your values?")), icon("next")) : null,

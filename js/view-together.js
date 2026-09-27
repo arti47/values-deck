@@ -23,7 +23,8 @@ function status(pid){
 App.route("together", () => {
   const S = App.state();
   const people = S.profiles;
-  const done = people.filter(p => App.latest(p.id));
+  const others = App.users().filter(u => u.id !== App.user().id);
+  const done = people.filter(p => App.latest(p.id)).concat(others.filter(u => App.peekCore(u.id)));
   const input = h("input", {id: "pname", type: "text", placeholder: "Their name", autocomplete: "off", maxlength: 30, enterkeyhint: "done"});
   const addP = e => {
     e.preventDefault();
@@ -40,10 +41,10 @@ App.route("together", () => {
       h("li", null, "Compare your values and talk them through.")),
     h("ul", {class: "people"}, people.map(p => {
       const st = status(p.id);
-      const col = p.id === "me" ? "var(--teal)" : p.color;
+      const col = p.id === "me" ? App.user().color : p.color;
       return h("li", {class: "person"},
-        h("span", {class: "avatar", style: {background: col}, "aria-hidden": "true"}, p.name.slice(0, 1).toUpperCase()),
-        h("span", {class: "pinfo"}, h("strong", null, p.id === "me" ? "Me" : p.name), h("span", {class: "pst " + st.k}, st.t)),
+        h("span", {class: "avatar", style: {background: col}, "aria-hidden": "true"}, (p.id === "me" ? App.user().name : p.name).slice(0, 1).toUpperCase()),
+        h("span", {class: "pinfo"}, h("strong", null, p.id === "me" ? App.user().name + " (you)" : p.name), h("span", {class: "pst " + st.k}, st.t)),
         h("a", {class: "btn sm " + (st.k === "done" ? "ghost" : "primary"), href: p.id === "me" ? "#/sort" : "#/handoff/" + p.id},
           st.k === "prog" ? "Resume" : st.k === "done" ? "Redo" : "Start"),
         p.id !== "me" ? h("button", {class: "icon-btn sm", "aria-label": "Remove " + p.name, onclick: async () => {
@@ -54,6 +55,15 @@ App.route("together", () => {
           }
         }}, icon("trash")) : null);
     })),
+    others.length ? h("section", null, h("h2", {class: "h3"}, "Others on this device"),
+      h("ul", {class: "people"}, others.map(u => {
+        const snap = App.peekCore(u.id);
+        return h("li", {class: "person"}, App.avatar(u),
+          h("span", {class: "pinfo"}, h("strong", null, u.name),
+            h("span", {class: "pst " + (snap ? "done" : "none")}, snap ? "Included in Compare" : u.share === false ? "Keeps values private" : "Hasn’t sorted yet")));
+      })),
+      h("p", {class: "muted small"}, "Guests below sort under your profile. People with their own profile are included automatically.")) : null,
+    h("h2", {class: "h3"}, "Add a guest"),
     h("form", {class: "add-person", onsubmit: addP},
       h("label", {for: "pname", class: "sr"}, "Add a person"), input,
       h("button", {class: "btn primary", type: "submit"}, icon("plus"), "Add")),
@@ -76,12 +86,17 @@ App.route("handoff", (params) => {
 
 App.route("compare", () => {
   const S = App.state();
-  const all = S.profiles.filter(p => App.latest(p.id));
+  // guests sorted on this profile + other people on this device who share their top 10
+  const all = S.profiles.filter(p => App.latest(p.id)).map(p => p.id === "me"
+      ? {id: "me", name: App.user().name, color: App.user().color, top: App.latest("me").top}
+      : {id: p.id, name: p.name, color: p.color, top: App.latest(p.id).top})
+    .concat(App.users().map(u => ({u, snap: App.peekCore(u.id)})).filter(x => x.snap)
+      .map(({u, snap}) => ({id: "u:" + u.id, name: u.name, color: u.color, top: snap.top, device: true})));
   if (all.length < 2) { App.go("#/together"); return h("div"); }
   let sel = (S.group.selected || all.map(p => p.id)).filter(id => all.some(p => p.id === id));
   if (sel.length < 2) sel = all.map(p => p.id);
-  const name = p => p.id === "me" ? "Me" : p.name;
-  const color = p => p.id === "me" ? "var(--teal)" : p.color;
+  const name = p => p.name;
+  const color = p => p.color;
 
   const picks = h("fieldset", {class: "who"}, h("legend", null, "Comparing"),
     all.map(p => h("label", {class: "who-chip"},
@@ -92,12 +107,12 @@ App.route("compare", () => {
       }}), h("span", {class: "dot", style: {background: color(p)}}), name(p))));
 
   const ppl = all.filter(p => sel.includes(p.id));
-  const tops = ppl.map(p => ({p, top: App.latest(p.id).top}));
+  const tops = ppl.map(p => ({p, top: p.top}));
   const count = {};
   tops.forEach(({top}) => top.forEach(id => count[id] = (count[id] || 0) + 1));
   const shared = Object.keys(count).filter(id => count[id] === ppl.length).map(Number);
   const some = Object.keys(count).filter(id => count[id] > 1 && count[id] < ppl.length).map(Number);
-  const who = id => ppl.filter(p => App.latest(p.id).top.includes(id));
+  const who = id => ppl.filter(p => p.top.includes(id));
   const chip = id => { const c = App.card(id); return c ? h("button", {class: "chip", onclick: () => App.showCard(id)}, App.title(c.name)) : null; };
 
   return h("div", null,

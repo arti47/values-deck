@@ -13,7 +13,14 @@ Personal HTML5 viewer simulating the physical *Live Your Values* card deck. Priv
 `[{ id:int, name:string (UPPERCASE), definition:string ("to …"), actions:string[], image:"data/images/NN_NAME.jpg" }]`
 - 73 cards. Custom cards: ids 101/102, stored in state, `image:null` (generated front).
 
-## State (localStorage `values-deck-state-v1`, single JSON)
+## Users (multi-user on one device)
+- Registry `values-deck-users` = `{active, users:[{id,name,color,pin(hash|null),share,created}]}`; per-user state key `values-deck-state-v1:<uid>`.
+- Legacy single key `values-deck-state-v1` auto-migrates to user `u1` ("Me").
+- "Who's using?" picker (`#/who`) gates every route once per browser session (sessionStorage `values-deck-unlocked`) when >1 user or PIN set. Home avatar = switch.
+- PIN: 4 digits, FNV hash, deterrent only. `share` = include my top 10 in others' Compare (`App.peekCore`).
+- Settings (theme, text, cadence) are per user. Backup/erase = current user only. Storage event from another tab switching user → reload.
+
+## State (per user, single JSON)
 `settings{theme,text,cadence,onboarded,swipeHint}`, `custom[2]`, `profiles[{id,name,color}]` ("me" + pass-the-phone people),
 `sorts{pid:{stage:piles|pick|rank,assign{id:most|some|not},log[],picked[],ranked[]}}` (in-progress),
 `snapshots[{id,profile,date,top[10],most[],some[],not[]}]` (latest "me" = core values),
@@ -21,7 +28,7 @@ Personal HTML5 viewer simulating the physical *Live Your Values* card deck. Priv
 Backup = export/import this JSON (Settings).
 
 ## Routes (hash)
-`#/` home · `#/sort[/pid]` 3-step wizard · `#/values` · `#/history` · `#/journal[/id]` · `#/audit/<area|summary>` · `#/decide[/new|/id]` · `#/reflect[/new]` · `#/together` · `#/handoff/pid` · `#/compare` · `#/deck` · `#/custom` · `#/settings`.
+`#/` home · `#/sort[/pid]` 3-step wizard · `#/values` · `#/history` · `#/journal[/id]` · `#/audit/<area|summary>` · `#/decide[/new|/id]` · `#/reflect[/new]` · `#/together` · `#/handoff/pid` · `#/compare` · `#/deck` · `#/custom` · `#/settings` · `#/users` · `#/who`.
 Views return `{node, focus?, tab?, cleanup?}`; `focus` hides tab bar.
 
 ## UI spec

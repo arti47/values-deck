@@ -64,6 +64,7 @@ const P = {
   upload:'<path d="M12 20V9M7 14l5-5 5 5M5 4h14"/>',
   flip:'<path d="M3 12a9 9 0 0115-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/><path d="M3 21v-5h5"/>',
   sparkle:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
   history:'<path d="M3 12a9 9 0 103-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/>'
 };
 function icon(name, cls){
@@ -74,8 +75,63 @@ function icon(name, cls){
 App.icon = icon;
 App.hydrateIcons = root => App.$$("[data-icon]", root).forEach(el => { const i = icon(el.dataset.icon); el.replaceWith(i); });
 
-/* ---------- state ---------- */
-const KEY = "values-deck-state-v1";
+/* ---------- users (device registry) ---------- */
+const UKEY = "values-deck-users";
+const OLDKEY = "values-deck-state-v1";               // pre-multi-user single state
+const skey = uid => OLDKEY + ":" + uid;
+App.COLORS = ["#1f7a8c", "#c8553d", "#6a994e", "#8e6bb8", "#d08c1e", "#3d7cc9", "#b5487a", "#4f8a83"];
+let U;   // {active, users:[{id, name, color, pin, share, created}]}
+function saveUsers(){ try{ localStorage.setItem(UKEY, JSON.stringify(U)); }catch(e){} }
+function loadUsers(){
+  try{ U = JSON.parse(localStorage.getItem(UKEY) || "null"); }catch(e){ U = null; }
+  if (!U || !Array.isArray(U.users) || !U.users.length){
+    U = {active: "u1", users: [{id: "u1", name: "Me", color: App.COLORS[0], pin: null, share: true, created: new Date().toISOString()}]};
+    try{ const old = localStorage.getItem(OLDKEY); if (old){ localStorage.setItem(skey("u1"), old); localStorage.removeItem(OLDKEY); } }catch(e){}
+    saveUsers();
+  }
+  if (!U.users.some(u => u.id === U.active)) U.active = U.users[0].id;
+}
+// PIN is a privacy deterrent, not security (FNV-1a hash, no server).
+App.hashPin = pin => { let x = 0x811c9dc5; for (const ch of "lyv:" + pin){ x ^= ch.charCodeAt(0); x = Math.imul(x, 0x01000193) >>> 0; } return x.toString(16); };
+App.users = () => U.users;
+App.user = id => U.users.find(u => u.id === (id || U.active));
+App.saveUsers = saveUsers;
+App.addUser = (name, color) => {
+  const u = {id: "u" + App.uid(), name: name.trim().slice(0, 30), color: color || App.COLORS[U.users.length % App.COLORS.length], pin: null, share: true, created: new Date().toISOString()};
+  U.users.push(u); saveUsers(); return u;
+};
+App.removeUser = id => {
+  U.users = U.users.filter(u => u.id !== id);
+  try{ localStorage.removeItem(skey(id)); }catch(e){}
+  if (!U.users.length) { localStorage.removeItem(UKEY); loadUsers(); }
+  if (U.active === id) { U.active = U.users[0].id; saveUsers(); load(); App.applySettings(); unlock(U.active); }
+  saveUsers();
+};
+App.switchUser = id => {
+  if (!App.user(id)) return;
+  flush(); U.active = id; saveUsers(); load(); App.applySettings(); unlock(id);
+};
+// "Who's using?" gate: shown once per browser session when >1 user or a PIN is set.
+const SESS = "values-deck-unlocked";
+function unlock(id){ try{ sessionStorage.setItem(SESS, id); }catch(e){} }
+App.unlock = unlock;
+App.needsPicker = () => {
+  let ok = null; try{ ok = sessionStorage.getItem(SESS); }catch(e){}
+  if (ok === U.active) return false;
+  return U.users.length > 1 || !!App.user().pin;
+};
+App.lock = () => { flush(); try{ sessionStorage.removeItem(SESS); }catch(e){} };
+// Read another user's latest own snapshot (for Compare), respecting their share flag.
+App.peekCore = id => {
+  const u = App.user(id); if (!u || u.share === false || id === U.active) return null;
+  try{
+    const st = JSON.parse(localStorage.getItem(skey(id)) || "null");
+    const ss = st && Array.isArray(st.snapshots) ? st.snapshots.filter(x => x.profile === "me") : [];
+    return ss.length ? ss[ss.length - 1] : null;
+  }catch(e){ return null; }
+};
+
+/* ---------- state (per user) ---------- */
 const blankCustom = id => ({id, name: "", definition: "", actions: []});
 function defaults(){
   return {
@@ -95,9 +151,10 @@ function defaults(){
 }
 let S;
 function load(){
+  if (!U) loadUsers();
   const d = defaults();
   try{
-    const raw = JSON.parse(localStorage.getItem(KEY) || "null");
+    const raw = JSON.parse(localStorage.getItem(skey(U.active)) || "null");
     if (raw && typeof raw === "object"){
       S = Object.assign(d, raw);
       S.settings = Object.assign(defaults().settings, raw.settings || {});
@@ -107,16 +164,12 @@ function load(){
     }
   }catch(e){}
   S = d;
-  // migrate old viewer position
-  try{
-    const old = JSON.parse(localStorage.getItem("values-deck-pos") || "null");
-    if (old && Array.isArray(old.order)){ S.deck.order = null; S.deck.i = old.i | 0; }
-  }catch(e){}
 }
 let saveTimer = null, warned = false;
 function flush(){
   clearTimeout(saveTimer); saveTimer = null;
-  try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+  if (!S || !U) return;
+  try{ localStorage.setItem(skey(U.active), JSON.stringify(S)); }
   catch(e){ if (!warned){ warned = true; App.toast("Couldn't save on this device. Private browsing?"); } }
 }
 App.state = () => S;
@@ -127,6 +180,8 @@ App.reset = () => { S = defaults(); S.settings.onboarded = true; flush(); };
 App.replaceState = obj => { const d = defaults(); S = Object.assign(d, obj); S.settings = Object.assign(defaults().settings, obj.settings || {}); flush(); };
 addEventListener("pagehide", flush);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
+// another tab switched user / edited: reload to avoid overwriting
+addEventListener("storage", e => { if (e.key === UKEY && U){ const n = JSON.parse(e.newValue || "null"); if (n && n.active !== U.active){ S = null; location.reload(); } } });
 
 /* ---------- cards ---------- */
 const BASE = (window.CARDS || []).map(c => Object.assign({}, c));
@@ -343,7 +398,8 @@ App.render = () => {
   const [path, qs] = raw.split("?");
   const parts = path.split("/").filter(Boolean).map(decodeURIComponent);
   const name = parts[0] || "";
-  const fn = routes[name] || routes[""];
+  const gated = App.needsPicker() && name !== "who";
+  const fn = gated ? routes.who : (routes[name] || routes[""]);
   if (cleanup){ try{ cleanup(); }catch(e){} cleanup = null; }
   App.$$("dialog.modal").forEach(d => { d.close(); d.remove(); });
   const main = App.$("#main");

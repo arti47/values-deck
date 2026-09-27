@@ -19,6 +19,8 @@ App.route("settings", () => {
   }});
   return h("div", null,
     App.head("Settings"),
+    h("a", {class: "list-row user-row", href: "#/users"}, App.avatar(App.user()),
+      h("span", {class: "lr-txt"}, h("strong", null, App.user().name), h("span", null, App.users().length > 1 ? App.users().length + " people on this device · switch or manage" : "Add people who share this device")), icon("next")),
     h("section", {class: "set-group"}, h("h2", {class: "h3"}, "Look & feel"),
       h("div", {class: "field"}, h("span", {class: "label"}, "Theme"),
         App.segmented("theme", [["auto", "Auto"], ["light", "Light"], ["dark", "Dark"]], S.settings.theme, v => set("theme", v), "Theme")),
@@ -31,15 +33,15 @@ App.route("settings", () => {
       h("a", {class: "list-row", href: "#/custom"}, icon("plus"), h("span", {class: "lr-txt"}, h("strong", null, "My own cards"), h("span", null, "Add up to 2 values not in the deck")), icon("next")),
       h("button", {class: "list-row", onclick: () => { S.settings.swipeHint = true; App.save(); App.onboard(); }}, icon("info"), h("span", {class: "lr-txt"}, h("strong", null, "Show the intro again")), icon("next"))),
     h("section", {class: "set-group"}, h("h2", {class: "h3"}, "Your data"),
-      h("p", {class: "muted small"}, "Everything stays on this phone. Save a backup file now and then, especially before clearing your browser."),
+      h("p", {class: "muted small"}, "Your data stays on this device. Backups cover your profile only. Save one now and then, especially before clearing your browser."),
       h("div", {class: "row wrap gap"},
         h("button", {class: "btn ghost", onclick: exportData}, icon("download"), "Save backup"),
         h("label", {class: "btn ghost", for: "imp"}, icon("upload"), "Restore backup"), file),
       h("button", {class: "btn ghost danger block", onclick: async () => {
-        if (await App.confirm("Erase everything?", "All sorts, notes, decisions and check-ins will be deleted from this phone. This can’t be undone.", {ok: "Erase all", danger: true})){
+        if (await App.confirm("Erase " + App.user().name + "’s data?", "All of " + App.user().name + "’s sorts, notes, decisions and check-ins will be deleted. Other people on this device are not affected. This can’t be undone.", {ok: "Erase all", danger: true})){
           App.reset(); App.applySettings(); App.toast("All data erased"); App.go("#/");
         }
-      }}, icon("trash"), "Erase all data")),
+      }}, icon("trash"), "Erase my data")),
     h("p", {class: "muted small center notice"}, "Card text and artwork © Lisa Congdon & Andreea Niculescu / Chronicle Books. Personal use only."));
 });
 
@@ -47,7 +49,7 @@ function exportData(){
   const S = App.state();
   const data = Object.assign({}, S, {exported: new Date().toISOString()});
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-  const a = h("a", {href: URL.createObjectURL(blob), download: "values-backup-" + new Date().toISOString().slice(0, 10) + ".json"});
+  const a = h("a", {href: URL.createObjectURL(blob), download: "values-backup-" + App.user().name.replace(/[^\w-]+/g, "_") + "-" + new Date().toISOString().slice(0, 10) + ".json"});
   document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   App.toast("Backup saved");

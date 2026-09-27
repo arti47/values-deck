@@ -1,5 +1,5 @@
 // Offline cache. Bump VERSION when data or app changes.
-const VERSION = "v2";
+const VERSION = "v3";
 const ASSETS = [
  "./",
  "index.html",
@@ -12,6 +12,7 @@ const ASSETS = [
  "js/view-together.js",
  "js/view-deck.js",
  "js/view-settings.js",
+ "js/view-users.js",
  "js/app.js",
  "manifest.webmanifest",
  "data/cards.js",

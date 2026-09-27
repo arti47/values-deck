@@ -13,6 +13,7 @@ Phone-first app for the *Live Your Values* deck (73 cards): find, rank and live 
 - **Together**: pass-the-phone group sorts, compare shared/unique, discussion questions.
 - **Deck**: browse, search, filter by pile, shuffle.
 - **My own cards**: 2 blank cards.
+- **Multiple users**: "Who's using?" picker, per-person private data, optional 4-digit PIN, compare with others on the device.
 - **Settings**: theme, text size, check-in frequency, backup/restore JSON, erase.
 
 ## Run
@@ -26,7 +27,7 @@ Phone-first app for the *Live Your Values* deck (73 cards): find, rank and live 
 | Sort | swipe right/up/left, buttons, keys 3/2/1 or arrows, U undo, F flip |
 | Deck | tap/Enter/F flip, arrows or swipe, S shuffle |
 
-All data stays in `localStorage`; back up from Settings.
+All data stays in `localStorage`, separate per person; each person backs up from Settings.
 
 ## Structure
 ```
