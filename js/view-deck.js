@@ -81,7 +81,7 @@ App.route("deck", () => {
     h("h1", {class: "sr", tabindex: "-1"}, "Deck"),
     h("div", {class: "deck-tools"},
       h("label", {class: "search"}, icon("search"), h("span", {class: "sr"}, "Search values"), search),
-      filters),
+      FILTERS.length > 1 ? filters : null),   // only "All" (no sort yet, no own cards) → nothing to filter
     h("div", {class: "deck-main"}, prev, stage, next),
     h("div", {class: "deck-bar"}, shuffle, count, h("span", {class: "muted small"}, "Tap to flip")));
   show(0);

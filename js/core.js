@@ -3,9 +3,10 @@
 (function(){
 "use strict";
 const App = window.App = {};
-App.VERSION = "1.8.0";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
+App.VERSION = "1.8.1";   // shown in Settings → About this app; bump with sw.js VERSION + add a CHANGELOG entry
 App.UPDATED = "2026-09-27";
 App.CHANGELOG = [
+  ["1.8.1", "Deck: filter bar only shows when there is something to filter."],
   ["1.8.0", "Polish: sort screen fits every phone, Back always visible while scrolling, clearer ratings, smoother pages, tab bar hides while typing."],
   ["1.7.0", "Sort together is now for everyone on the device: start it from “Who’s using?” or Home. Each person sorts into their own profile. Old guests became people."],
   ["1.6.0", "About this app: version, what’s new, privacy and credits."],
